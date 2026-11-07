@@ -1,0 +1,15 @@
+diff --git a/src/backend/partitioning/partprune.c b/src/backend/partitioning/partprune.c
+index 64b864b..027a83c 100644
+--- a/src/backend/partitioning/partprune.c
++++ b/src/backend/partitioning/partprune.c
+@@ -3659,6 +3659,10 @@ perform_pruning_combine_step(PartitionPruneContext *context,
+ 				step_result = step_results[step_id];
+ 				Assert(step_result != NULL);
+ 
++				/* Skip steps that contribute no bound offsets. */
++				if (bms_is_empty(step_result->bound_offsets))
++					continue;
++
+ 				/* Record any additional datum indexes from this step */
+ 				result->bound_offsets = bms_add_members(result->bound_offsets,
+ 														step_result->bound_offsets);

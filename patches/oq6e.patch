@@ -1,0 +1,79 @@
+diff --git a/src/backend/partitioning/partprune.c b/src/backend/partitioning/partprune.c
+index 027a83c..5086e18 100644
+--- a/src/backend/partitioning/partprune.c
++++ b/src/backend/partitioning/partprune.c
+@@ -3659,8 +3659,14 @@ perform_pruning_combine_step(PartitionPruneContext *context,
+ 				step_result = step_results[step_id];
+ 				Assert(step_result != NULL);
+ 
+-				/* Skip steps that contribute no bound offsets. */
+-				if (bms_is_empty(step_result->bound_offsets))
++				/* Skip steps that contribute no bound offsets and don't set
++				 * scan_null or scan_default.  A step may contribute only by setting
++				 * one of those flags, e.g. an equality clause on a value that is not
++				 * in any list partition's bound set (so it matches no non-default
++				 * partitions) but where the default partition must be scanned.
++				 */
++				if (bms_is_empty(step_result->bound_offsets) &&
++					!step_result->scan_null && !step_result->scan_default)
+ 					continue;
+ 
+ 				/* Record any additional datum indexes from this step */
+diff --git a/src/test/regress/expected/partition_prune.out b/src/test/regress/expected/partition_prune.out
+index 3c76a88..083267a 100644
+--- a/src/test/regress/expected/partition_prune.out
++++ b/src/test/regress/expected/partition_prune.out
+@@ -119,6 +119,32 @@ explain (costs off) select * from lp where a is not null and (a = 'a' or a = 'c'
+          Filter: ((a IS NOT NULL) AND ((a = 'a'::bpchar) OR (a = 'c'::bpchar)))
+ (5 rows)
+ 
++-- OR clause where one arm matches only the default partition (the value is not
++-- in any non-default list).  The arm that matches no explicit partition yields
++-- a step with empty bound offsets but scan_default set, so the default must not
++-- be pruned when unioning the OR arms.  Only lp_g and lp_default are scanned.
++explain (costs off) select * from lp where a = 'g' or a = 'z';
++                        QUERY PLAN                        
++----------------------------------------------------------
++ Append
++   ->  Seq Scan on lp_g lp_1
++         Filter: ((a = 'g'::bpchar) OR (a = 'z'::bpchar))
++   ->  Seq Scan on lp_default lp_2
++         Filter: ((a = 'g'::bpchar) OR (a = 'z'::bpchar))
++(5 rows)
++
++-- The same with an AND inside the second arm, matching the form that
++-- regressed (an OR arm whose combined step sets only scan_default).
++explain (costs off) select * from lp where a = 'g' or (a = 'z' and a is not null);
++                                   QUERY PLAN                                   
++--------------------------------------------------------------------------------
++ Append
++   ->  Seq Scan on lp_g lp_1
++         Filter: ((a = 'g'::bpchar) OR ((a = 'z'::bpchar) AND (a IS NOT NULL)))
++   ->  Seq Scan on lp_default lp_2
++         Filter: ((a = 'g'::bpchar) OR ((a = 'z'::bpchar) AND (a IS NOT NULL)))
++(5 rows)
++
+ explain (costs off) select * from lp where a <> 'g';
+              QUERY PLAN             
+ ------------------------------------
+diff --git a/src/test/regress/sql/partition_prune.sql b/src/test/regress/sql/partition_prune.sql
+index 01f4453..587b605 100644
+--- a/src/test/regress/sql/partition_prune.sql
++++ b/src/test/regress/sql/partition_prune.sql
+@@ -40,6 +40,16 @@ explain (costs off) select * from lp where a is not null;
+ explain (costs off) select * from lp where a is null;
+ explain (costs off) select * from lp where a = 'a' or a = 'c';
+ explain (costs off) select * from lp where a is not null and (a = 'a' or a = 'c');
++
++-- OR clause where one arm matches only the default partition (the value is not
++-- in any non-default list).  The arm that matches no explicit partition yields
++-- a step with empty bound offsets but scan_default set, so the default must not
++-- be pruned when unioning the OR arms.  Only lp_g and lp_default are scanned.
++explain (costs off) select * from lp where a = 'g' or a = 'z';
++
++-- The same with an AND inside the second arm, matching the form that
++-- regressed (an OR arm whose combined step sets only scan_default).
++explain (costs off) select * from lp where a = 'g' or (a = 'z' and a is not null);
+ explain (costs off) select * from lp where a <> 'g';
+ explain (costs off) select * from lp where a <> 'a' and a <> 'd';
+ explain (costs off) select * from lp where a not in ('a', 'd');

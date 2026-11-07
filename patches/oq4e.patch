@@ -1,0 +1,100 @@
+diff --git a/src/backend/partitioning/partprune.c b/src/backend/partitioning/partprune.c
+index 027a83c..cb87942 100644
+--- a/src/backend/partitioning/partprune.c
++++ b/src/backend/partitioning/partprune.c
+@@ -3659,8 +3659,9 @@ perform_pruning_combine_step(PartitionPruneContext *context,
+ 				step_result = step_results[step_id];
+ 				Assert(step_result != NULL);
+ 
+-				/* Skip steps that contribute no bound offsets. */
+-				if (bms_is_empty(step_result->bound_offsets))
++				/* Skip steps that contribute nothing. */
++				if (bms_is_empty(step_result->bound_offsets) &&
++					!step_result->scan_null && !step_result->scan_default)
+ 					continue;
+ 
+ 				/* Record any additional datum indexes from this step */
+diff --git a/src/test/regress/expected/partition_prune.out b/src/test/regress/expected/partition_prune.out
+index 3c76a88..a7e3c99 100644
+--- a/src/test/regress/expected/partition_prune.out
++++ b/src/test/regress/expected/partition_prune.out
+@@ -5106,3 +5106,48 @@ select * from (select a, b from phv_boolpart) t
+ (2 rows)
+ 
+ drop table phv_boolpart;
++-- OR clause where one arm matches only the default partition: combining
++-- results must preserve that arm's "scan default" flag even though it has
++-- no matching list datums (empty bound offsets).
++create table or_def_part (k int, label text) partition by list (k);
++create table or_def_part_a partition of or_def_part for values in (1, 2);
++create table or_def_part_b partition of or_def_part for values in (10, 20);
++create table or_def_part_null partition of or_def_part for values in (null);
++create table or_def_part_default partition of or_def_part default;
++insert into or_def_part values (1, 'a1'), (2, 'a2'), (10, 'b10'),
++  (20, 'b20'), (99, 'keep'), (99, 'drop'), (null, 'nil'), (-7, 'neg');
++explain (costs off)
++select k, label from or_def_part where k = 20 or (k = 99 and label = 'keep') order by k, label;
++                                QUERY PLAN                                 
++---------------------------------------------------------------------------
++ Sort
++   Sort Key: or_def_part.k, or_def_part.label
++   ->  Append
++         ->  Seq Scan on or_def_part_b or_def_part_1
++               Filter: ((k = 20) OR ((k = 99) AND (label = 'keep'::text)))
++         ->  Seq Scan on or_def_part_default or_def_part_2
++               Filter: ((k = 20) OR ((k = 99) AND (label = 'keep'::text)))
++(7 rows)
++
++select k, label from or_def_part where k = 20 or (k = 99 and label = 'keep') order by k, label;
++ k  | label 
++----+-------
++ 20 | b20
++ 99 | keep
++(2 rows)
++
++-- The default partition must be pruned when no OR arm can match it.
++explain (costs off)
++select k, label from or_def_part where k = 20 or (k = 1 and label = 'a1') order by k, label;
++                               QUERY PLAN                               
++------------------------------------------------------------------------
++ Sort
++   Sort Key: or_def_part.k, or_def_part.label
++   ->  Append
++         ->  Seq Scan on or_def_part_a or_def_part_1
++               Filter: ((k = 20) OR ((k = 1) AND (label = 'a1'::text)))
++         ->  Seq Scan on or_def_part_b or_def_part_2
++               Filter: ((k = 20) OR ((k = 1) AND (label = 'a1'::text)))
++(7 rows)
++
++drop table or_def_part;
+diff --git a/src/test/regress/sql/partition_prune.sql b/src/test/regress/sql/partition_prune.sql
+index 01f4453..98c6abd 100644
+--- a/src/test/regress/sql/partition_prune.sql
++++ b/src/test/regress/sql/partition_prune.sql
+@@ -1605,3 +1605,26 @@ select * from (select a, b from phv_boolpart) t
+   group by grouping sets (a, b);
+ 
+ drop table phv_boolpart;
++
++-- OR clause where one arm matches only the default partition: combining
++-- results must preserve that arm's "scan default" flag even though it has
++-- no matching list datums (empty bound offsets).
++create table or_def_part (k int, label text) partition by list (k);
++create table or_def_part_a partition of or_def_part for values in (1, 2);
++create table or_def_part_b partition of or_def_part for values in (10, 20);
++create table or_def_part_null partition of or_def_part for values in (null);
++create table or_def_part_default partition of or_def_part default;
++
++insert into or_def_part values (1, 'a1'), (2, 'a2'), (10, 'b10'),
++  (20, 'b20'), (99, 'keep'), (99, 'drop'), (null, 'nil'), (-7, 'neg');
++
++explain (costs off)
++select k, label from or_def_part where k = 20 or (k = 99 and label = 'keep') order by k, label;
++
++select k, label from or_def_part where k = 20 or (k = 99 and label = 'keep') order by k, label;
++
++-- The default partition must be pruned when no OR arm can match it.
++explain (costs off)
++select k, label from or_def_part where k = 20 or (k = 1 and label = 'a1') order by k, label;
++
++drop table or_def_part;

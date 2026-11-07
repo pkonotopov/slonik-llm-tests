@@ -1,0 +1,89 @@
+diff --git a/src/backend/partitioning/partprune.c b/src/backend/partitioning/partprune.c
+index 027a83c..10070ad 100644
+--- a/src/backend/partitioning/partprune.c
++++ b/src/backend/partitioning/partprune.c
+@@ -3659,9 +3659,11 @@ perform_pruning_combine_step(PartitionPruneContext *context,
+ 				step_result = step_results[step_id];
+ 				Assert(step_result != NULL);
+ 
+-				/* Skip steps that contribute no bound offsets. */
+-				if (bms_is_empty(step_result->bound_offsets))
+-					continue;
++				/*
++				 * Even if this step contributes no bound offsets, it may
++				 * still require scanning the null and/or default partition,
++				 * so we must update those flags regardless.
++				 */
+ 
+ 				/* Record any additional datum indexes from this step */
+ 				result->bound_offsets = bms_add_members(result->bound_offsets,
+diff --git a/src/test/regress/expected/partition_prune.out b/src/test/regress/expected/partition_prune.out
+index 3c76a88..64e1934 100644
+--- a/src/test/regress/expected/partition_prune.out
++++ b/src/test/regress/expected/partition_prune.out
+@@ -5106,3 +5106,36 @@ select * from (select a, b from phv_boolpart) t
+ (2 rows)
+ 
+ drop table phv_boolpart;
++--
++-- OR-clause pruning with a default partition: a step that yields no bound
++-- offsets but must scan the default (or null) partition should not be skipped
++-- when combining step results.
++--
++create table or_prune (k int, label text) partition by list (k);
++create table or_prune_a partition of or_prune for values in (1,2);
++create table or_prune_b partition of or_prune for values in (10,20);
++create table or_prune_null partition of or_prune for values in (null);
++create table or_prune_default partition of or_prune default;
++insert into or_prune values (1,'a1'),(2,'a2'),(10,'b10'),(20,'b20'),
++  (99,'keep'),(99,'drop'),(null,'nil'),(-7,'keep');
++explain (costs off)
++select k,label from or_prune where k = 20 or (k = 99 and label = 'keep') order by k,label;
++                                QUERY PLAN                                 
++---------------------------------------------------------------------------
++ Sort
++   Sort Key: or_prune.k, or_prune.label
++   ->  Append
++         ->  Seq Scan on or_prune_b or_prune_1
++               Filter: ((k = 20) OR ((k = 99) AND (label = 'keep'::text)))
++         ->  Seq Scan on or_prune_default or_prune_2
++               Filter: ((k = 20) OR ((k = 99) AND (label = 'keep'::text)))
++(7 rows)
++
++select k,label from or_prune where k = 20 or (k = 99 and label = 'keep') order by k,label;
++ k  | label 
++----+-------
++ 20 | b20
++ 99 | keep
++(2 rows)
++
++drop table or_prune;
+diff --git a/src/test/regress/sql/partition_prune.sql b/src/test/regress/sql/partition_prune.sql
+index 01f4453..fb46c91 100644
+--- a/src/test/regress/sql/partition_prune.sql
++++ b/src/test/regress/sql/partition_prune.sql
+@@ -1605,3 +1605,24 @@ select * from (select a, b from phv_boolpart) t
+   group by grouping sets (a, b);
+ 
+ drop table phv_boolpart;
++
++--
++-- OR-clause pruning with a default partition: a step that yields no bound
++-- offsets but must scan the default (or null) partition should not be skipped
++-- when combining step results.
++--
++create table or_prune (k int, label text) partition by list (k);
++create table or_prune_a partition of or_prune for values in (1,2);
++create table or_prune_b partition of or_prune for values in (10,20);
++create table or_prune_null partition of or_prune for values in (null);
++create table or_prune_default partition of or_prune default;
++
++insert into or_prune values (1,'a1'),(2,'a2'),(10,'b10'),(20,'b20'),
++  (99,'keep'),(99,'drop'),(null,'nil'),(-7,'keep');
++
++explain (costs off)
++select k,label from or_prune where k = 20 or (k = 99 and label = 'keep') order by k,label;
++
++select k,label from or_prune where k = 20 or (k = 99 and label = 'keep') order by k,label;
++
++drop table or_prune;
