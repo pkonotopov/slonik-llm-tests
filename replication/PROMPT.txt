@@ -1,0 +1,20 @@
+Repair a C defect in the PostgreSQL 18.6 source snapshot in /work.
+
+A subscriber with streaming=parallel can retain a row from a rolled-back
+savepoint. The publisher has rolled the batch back and committed the outer
+transaction. The subscriber has applied a later barrier transaction, yet
+its ledger contains an extra row. The reported incident included a switch
+to partial serialization after the apply worker became blocked. Other runs
+with more than one spooled stream block can hit a protocol error and restart apply.
+
+The snapshot includes a change intended to reclaim temporary disk space
+for an aborted batch while its outer transaction is still open. Preserve
+reclamation of an eligible aborted DML suffix and preserve logical apply
+semantics. Keep the fix in PostgreSQL C and add a regression test. Do not
+change the SQL contract, turn off parallel apply, defer all reclamation to
+commit, or modify the benchmark tools.
+
+Run `bash /bench/run.sh` for a build and a focused two-node SQL probe.
+Build output persists in /build. The source and the shell are available
+offline. Leave your patch in /work and summarize the cause, the fix and
+the checks you actually ran.

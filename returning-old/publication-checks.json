@@ -1,0 +1,404 @@
+{
+  "date": "2026-11-08",
+  "scope": "Packaging validation, separate from the historical model-run results in results.json. No new inference was run.",
+  "platform": {
+    "kernel": "Linux 7.0.0-42-generic",
+    "gcc": "15.2.0",
+    "python": "3.14.4",
+    "bubblewrap": "0.11.1",
+    "build_jobs": 2
+  },
+  "source_revisions": {
+    "before": "abecdbc6af0192eb8fc017af5c7a3bb3d5da1ae3",
+    "fixed": "4908225bebdc31c9b8f735ad1db3d08d9bc85148"
+  },
+  "static_checks": {
+    "python_ast_parse": true,
+    "bash_syntax": true,
+    "json_parse": true,
+    "private_pattern_scan": true,
+    "original_patch_bytes_unchanged": true,
+    "prompt_and_patch_hashes_match_results": true,
+    "per_response_token_sums_match_results": true
+  },
+  "quick_roundtrip": {
+    "full_suites": false,
+    "baseline_reproduced": true,
+    "upstream_passed": true,
+    "models": {
+      "slonik": {
+        "candidate_passed": true,
+        "test_detected_original_bug": true,
+        "stale_value_observed": true
+      }
+    },
+    "pass": true
+  },
+  "fresh_build_results": {
+    "before": {
+      "label": "before",
+      "independent_checkout": true,
+      "steps": {
+        "build": 0,
+        "scenarios": 1
+      },
+      "scenarios": {
+        "commit_with_trigger": {
+          "actual": {
+            "sqlstate": "00000",
+            "returning": [
+              "7|18"
+            ],
+            "stored": [
+              "18"
+            ]
+          },
+          "expected": {
+            "sqlstate": "00000",
+            "returning": [
+              "17|18"
+            ],
+            "stored": [
+              "18"
+            ]
+          },
+          "pass": false
+        },
+        "rollback_with_trigger": {
+          "actual": {
+            "sqlstate": "00000",
+            "returning": [
+              "7|8"
+            ],
+            "stored": [
+              "8"
+            ]
+          },
+          "expected": {
+            "sqlstate": "00000",
+            "returning": [
+              "7|8"
+            ],
+            "stored": [
+              "8"
+            ]
+          },
+          "pass": true
+        },
+        "commit_without_trigger": {
+          "actual": {
+            "sqlstate": "00000",
+            "returning": [
+              "17|18"
+            ],
+            "stored": [
+              "18"
+            ]
+          },
+          "expected": {
+            "sqlstate": "00000",
+            "returning": [
+              "17|18"
+            ],
+            "stored": [
+              "18"
+            ]
+          },
+          "pass": true
+        },
+        "predicate_rechecked": {
+          "actual": {
+            "sqlstate": "00000",
+            "returning": [],
+            "stored": [
+              "17"
+            ]
+          },
+          "expected": {
+            "sqlstate": "00000",
+            "returning": [],
+            "stored": [
+              "17"
+            ]
+          },
+          "pass": true
+        },
+        "repeatable_read": {
+          "actual": {
+            "sqlstate": "40001",
+            "returning": [],
+            "stored": [
+              "17"
+            ]
+          },
+          "expected": {
+            "sqlstate": "40001",
+            "returning": [],
+            "stored": [
+              "17"
+            ]
+          },
+          "pass": true
+        }
+      },
+      "seconds": 149.76
+    },
+    "upstream": {
+      "label": "upstream",
+      "independent_checkout": true,
+      "steps": {
+        "build": 0,
+        "scenarios": 0,
+        "replication": 0,
+        "upstream_isolation": 0,
+        "fdw": 0
+      },
+      "scenarios": {
+        "commit_with_trigger": {
+          "actual": {
+            "sqlstate": "00000",
+            "returning": [
+              "17|18"
+            ],
+            "stored": [
+              "18"
+            ]
+          },
+          "expected": {
+            "sqlstate": "00000",
+            "returning": [
+              "17|18"
+            ],
+            "stored": [
+              "18"
+            ]
+          },
+          "pass": true
+        },
+        "rollback_with_trigger": {
+          "actual": {
+            "sqlstate": "00000",
+            "returning": [
+              "7|8"
+            ],
+            "stored": [
+              "8"
+            ]
+          },
+          "expected": {
+            "sqlstate": "00000",
+            "returning": [
+              "7|8"
+            ],
+            "stored": [
+              "8"
+            ]
+          },
+          "pass": true
+        },
+        "commit_without_trigger": {
+          "actual": {
+            "sqlstate": "00000",
+            "returning": [
+              "17|18"
+            ],
+            "stored": [
+              "18"
+            ]
+          },
+          "expected": {
+            "sqlstate": "00000",
+            "returning": [
+              "17|18"
+            ],
+            "stored": [
+              "18"
+            ]
+          },
+          "pass": true
+        },
+        "predicate_rechecked": {
+          "actual": {
+            "sqlstate": "00000",
+            "returning": [],
+            "stored": [
+              "17"
+            ]
+          },
+          "expected": {
+            "sqlstate": "00000",
+            "returning": [],
+            "stored": [
+              "17"
+            ]
+          },
+          "pass": true
+        },
+        "repeatable_read": {
+          "actual": {
+            "sqlstate": "40001",
+            "returning": [],
+            "stored": [
+              "17"
+            ]
+          },
+          "expected": {
+            "sqlstate": "40001",
+            "returning": [],
+            "stored": [
+              "17"
+            ]
+          },
+          "pass": true
+        }
+      },
+      "seconds": 167.05
+    },
+    "slonik": {
+      "label": "slonik",
+      "independent_checkout": true,
+      "steps": {
+        "build": 0,
+        "scenarios": 0,
+        "replication": 0,
+        "upstream_isolation": 0,
+        "fdw": 0
+      },
+      "scenarios": {
+        "commit_with_trigger": {
+          "actual": {
+            "sqlstate": "00000",
+            "returning": [
+              "17|18"
+            ],
+            "stored": [
+              "18"
+            ]
+          },
+          "expected": {
+            "sqlstate": "00000",
+            "returning": [
+              "17|18"
+            ],
+            "stored": [
+              "18"
+            ]
+          },
+          "pass": true
+        },
+        "rollback_with_trigger": {
+          "actual": {
+            "sqlstate": "00000",
+            "returning": [
+              "7|8"
+            ],
+            "stored": [
+              "8"
+            ]
+          },
+          "expected": {
+            "sqlstate": "00000",
+            "returning": [
+              "7|8"
+            ],
+            "stored": [
+              "8"
+            ]
+          },
+          "pass": true
+        },
+        "commit_without_trigger": {
+          "actual": {
+            "sqlstate": "00000",
+            "returning": [
+              "17|18"
+            ],
+            "stored": [
+              "18"
+            ]
+          },
+          "expected": {
+            "sqlstate": "00000",
+            "returning": [
+              "17|18"
+            ],
+            "stored": [
+              "18"
+            ]
+          },
+          "pass": true
+        },
+        "predicate_rechecked": {
+          "actual": {
+            "sqlstate": "00000",
+            "returning": [],
+            "stored": [
+              "17"
+            ]
+          },
+          "expected": {
+            "sqlstate": "00000",
+            "returning": [],
+            "stored": [
+              "17"
+            ]
+          },
+          "pass": true
+        },
+        "repeatable_read": {
+          "actual": {
+            "sqlstate": "40001",
+            "returning": [],
+            "stored": [
+              "17"
+            ]
+          },
+          "expected": {
+            "sqlstate": "40001",
+            "returning": [],
+            "stored": [
+              "17"
+            ]
+          },
+          "pass": true
+        }
+      },
+      "seconds": 175.97
+    }
+  },
+  "fresh_test_only_result": {
+    "label": "slonik",
+    "detected": true,
+    "changed_specs": [
+      "returning-old-concurrent"
+    ],
+    "paired_specs": [
+      "returning-old-concurrent"
+    ],
+    "exit_code": 2,
+    "failing_tests": [
+      "returning-old-concurrent"
+    ],
+    "stale_value_observed": true
+  },
+  "nested_git_apply_checks": {
+    "slonik": {
+      "full": "applied in its own nested Git root; C-change boundary checked",
+      "test-only": "applied in its own nested Git root; C-change boundary checked"
+    },
+    "qwen": {
+      "full": "applied in its own nested Git root; C-change boundary checked",
+      "test-only": "applied in its own nested Git root; C-change boundary checked"
+    },
+    "glm": {
+      "full": "applied in its own nested Git root; C-change boundary checked",
+      "test-only": "applied in its own nested Git root; C-change boundary checked"
+    }
+  },
+  "limits": [
+    "The fresh roundtrip checked the baseline, upstream fix and Slonik. It skipped full core/isolation suites on fixed builds; their historical results for all three models remain in results.json.",
+    "The Slonik test-only check ran the isolation suite on the defective C code and required its new test to fail with the original stale OLD value.",
+    "The fresh roundtrip used a work directory outside any parent Git repository. The subsequent explicit Git-root initialization fix was checked separately in nested repositories for all three full and test-only patches; it did not change model patches or test logic.",
+    "Qwen and GLM were not rebuilt again for this packaging check. Both exact patches passed nested clean-apply checks; their full independent build/test results are historical."
+  ]
+}

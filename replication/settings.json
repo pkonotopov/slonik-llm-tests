@@ -1,0 +1,98 @@
+{
+  "scope": "Recorded settings for the historical replication runs. Unknown means not established from retained evidence; current service defaults are not substituted.",
+  "agent": {
+    "name": "Markov",
+    "availability": "Internal Postgres Professional agent; model inference runs are not reproduced by the public verifier.",
+    "mode": "auto",
+    "network": "offline model workspace",
+    "tools": [
+      "isolated shell"
+    ],
+    "prompt": "PROMPT.txt",
+    "instructions": "Use only the supplied isolated shell. Follow PostgreSQL C style. Do not delegate or commit.",
+    "max_continuations": 2,
+    "session_wall_time_limit_seconds": 5400,
+    "continuation_prompt": "Continue your original assignment from the current workspace. Check existing changes before repeating any actions."
+  },
+  "build": {
+    "cflags": "-O0",
+    "configure_flags": [
+      "--enable-cassert",
+      "--enable-tap-tests"
+    ],
+    "original_parallel_jobs": 4
+  },
+  "models": {
+    "slonik": {
+      "model": "Slonik-27B-oQ8-mtp",
+      "model_revision": null,
+      "context_window": 131072,
+      "max_output_tokens": 16384,
+      "thinking": true,
+      "server_thinking_budget_enabled": false,
+      "seed": null,
+      "effective_sampling_parameters": null,
+      "lightning_mtp_enabled": null,
+      "markov_request_params": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "repetition_penalty": 1.15,
+        "chat_template_kwargs": {
+          "enable_thinking": true
+        },
+        "thinking_budget": 192
+      },
+      "thinking_budget_note": "192 was requested; enforcement by the server was not independently established."
+    },
+    "qwen": {
+      "model": "Qwen3.8-27B-8bit",
+      "model_revision": null,
+      "context_window": 32768,
+      "max_output_tokens": 8192,
+      "thinking": true,
+      "server_thinking_budget_enabled": false,
+      "seed": null,
+      "effective_sampling_parameters": null,
+      "lightning_mtp_enabled": null,
+      "markov_request_params": null,
+      "server_enable_thinking": true
+    },
+    "glm": {
+      "model": "GLM-5.3-Flash-oQ4e-mtp",
+      "model_revision": null,
+      "context_window": 131072,
+      "max_output_tokens": 16384,
+      "thinking": true,
+      "server_thinking_budget_enabled": false,
+      "seed": null,
+      "effective_sampling_parameters": null,
+      "lightning_mtp_enabled": null,
+      "markov_request_params": {
+        "reasoning_effort": "high",
+        "chat_template_kwargs": {
+          "reasoning_effort": "high",
+          "clear_thinking": true
+        }
+      }
+    },
+    "qwen-131072": {
+      "model": "Qwen3.8-27B-8bit",
+      "model_revision": null,
+      "context_window": 131072,
+      "max_output_tokens": 16384,
+      "thinking": true,
+      "server_thinking_budget_enabled": false,
+      "seed": null,
+      "effective_sampling_parameters": null,
+      "lightning_mtp_enabled": null,
+      "markov_request_params": null,
+      "server_enable_thinking": true
+    }
+  },
+  "comparison_limits": [
+    "The first Qwen run had lower context and output limits.",
+    "The Qwen repeat changed both limits; a single repeat does not isolate their causal effect.",
+    "Effective server sampling overrides and model revisions were not fully captured.",
+    "These are case studies, not an estimate of fine-tuning benefit."
+  ]
+}

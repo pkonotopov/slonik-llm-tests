@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "observed_run_date": "2026-11-07",
+  "settings_status": "Only historically evidenced settings are populated. null means not retained in the surviving run evidence, not disabled or default. Current service settings were not substituted.",
+  "source_revision": "63d9e26c27b9965a78f0d59512a80d84935a7c4b",
+  "agent": {
+    "name": "Markov native core via SDK",
+    "task_concurrency": 1,
+    "job_timeout_seconds": 1300,
+    "maximum_shell_call_seconds": 450,
+    "initial_prompt_file": "PROMPT.txt",
+    "initial_prompt_sha256": "975bcb755463d1338ff30e29a0886b2cc15987978aa80f8b4e6f6bc863e26704",
+    "tools": "One Bash shell in an offline isolated workspace. No builtins. No delegation.",
+    "source_visibility": "Single baseline commit with read-only metadata. Clean upstream, injected diff and independent checks outside the model workspace.",
+    "source_path_in_model_sandbox": "/work",
+    "build_path_in_model_sandbox": "/build",
+    "visible_probe_command": "/bench/repro",
+    "model_settings_capture": "The Slonik runner copied the then-configured oQ8 provider entry for all three quants. The temporary copy was not retained. Full inference parameter snapshots are unavailable for this case.",
+    "slonik_system_instructions_file": "AGENT-INSTRUCTIONS.txt",
+    "glm_additional_instructions": "Not established by the surviving settings record."
+  },
+  "independent_build": {
+    "cflags": "-O0",
+    "configure_args": [
+      "--enable-cassert"
+    ],
+    "jobs": 6
+  },
+  "models": [
+    {
+      "model": "Slonik-27B-oQ8-mtp",
+      "context_window": null,
+      "max_output_tokens": null,
+      "max_output_evidence": null,
+      "enable_thinking": null,
+      "thinking_budget": null,
+      "reasoning_effort": null,
+      "temperature": null,
+      "top_p": null,
+      "lightning_mtp_runtime": null,
+      "initial_shell_approval": "No automatic approval handler. This run stopped at a test-writing approval request.",
+      "additional_attempt": "New session with earlier C patch and FOLLOWUP.txt; validated isolated shell calls automatically approved once."
+    },
+    {
+      "model": "Slonik-27B-oQ6e-mtp",
+      "context_window": null,
+      "max_output_tokens": null,
+      "max_output_evidence": null,
+      "enable_thinking": null,
+      "thinking_budget": null,
+      "reasoning_effort": null,
+      "temperature": null,
+      "top_p": null,
+      "lightning_mtp_runtime": null,
+      "initial_shell_approval": "No automatic approval handler.",
+      "additional_attempt": null
+    },
+    {
+      "model": "Slonik-27B-oQ4e-mtp",
+      "context_window": null,
+      "max_output_tokens": 16384,
+      "max_output_evidence": "Initial response ended with finish_reason=length at 16384 tokens",
+      "enable_thinking": null,
+      "thinking_budget": null,
+      "reasoning_effort": null,
+      "temperature": null,
+      "top_p": null,
+      "lightning_mtp_runtime": null,
+      "initial_shell_approval": "No automatic approval handler.",
+      "additional_attempt": "Fresh defective source and RETRY-oQ4e.txt; validated isolated shell calls automatically approved once."
+    },
+    {
+      "model": "GLM-5.3-Flash-oQ4e-mtp",
+      "context_window": null,
+      "max_output_tokens": null,
+      "enable_thinking": null,
+      "thinking_budget": null,
+      "reasoning_effort": "high",
+      "temperature": null,
+      "top_p": null,
+      "lightning_mtp_runtime": null,
+      "initial_shell_approval": "Validated isolated shell calls automatically approved once from the start.",
+      "additional_attempt": null
+    }
+  ]
+}

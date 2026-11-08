@@ -1,0 +1,137 @@
+{
+  "record_kind": "publication recheck",
+  "date": "2026-11-08",
+  "new_builds_run": true,
+  "inference_run": false,
+  "source": "Saved clean source for the archived-artifact recheck; freshly fetched pinned Git source for the GLM wrapper run",
+  "patch_application": {
+    "oq8": {
+      "apply_check_pass": true,
+      "tests_only": false
+    },
+    "oq8-tests-only": {
+      "apply_check_pass": true,
+      "tests_only": true
+    },
+    "oq6e": {
+      "apply_check_pass": true,
+      "tests_only": false
+    },
+    "oq6e-tests-only": {
+      "apply_check_pass": true,
+      "tests_only": true
+    },
+    "oq4e": {
+      "apply_check_pass": true,
+      "tests_only": false
+    },
+    "oq4e-tests-only": {
+      "apply_check_pass": true,
+      "tests_only": true
+    },
+    "glm": {
+      "apply_check_pass": true,
+      "tests_only": false,
+      "partprune_c_matches_clean_upstream": true
+    },
+    "glm-tests-only": {
+      "apply_check_pass": true,
+      "tests_only": true
+    }
+  },
+  "installed_binary_oracle": {
+    "clean": {
+      "version": "18.6",
+      "check_count": 15,
+      "failed_checks": [],
+      "expected_outcome": true
+    },
+    "defect": {
+      "version": "18.6",
+      "check_count": 15,
+      "failed_checks": [
+        "visible",
+        "default_first",
+        "default_only",
+        "null_and_regular",
+        "null_and_default",
+        "nested_or",
+        "prepared_default_force_custom_plan",
+        "prepared_default_force_generic_plan"
+      ],
+      "expected_outcome": true
+    },
+    "oq8": {
+      "version": "18.6",
+      "check_count": 15,
+      "failed_checks": [],
+      "expected_outcome": true
+    },
+    "oq6e": {
+      "version": "18.6",
+      "check_count": 15,
+      "failed_checks": [],
+      "expected_outcome": true
+    },
+    "oq4e": {
+      "version": "18.6",
+      "check_count": 15,
+      "failed_checks": [],
+      "expected_outcome": true
+    },
+    "glm": {
+      "version": "18.6",
+      "check_count": 15,
+      "failed_checks": [],
+      "expected_outcome": true
+    }
+  },
+  "sensitivity_diff_recheck": {
+    "oq8": {
+      "archived_diff_contains_changed_new_expectations": true,
+      "matching_line_count": 10
+    },
+    "oq6e": {
+      "archived_diff_contains_changed_new_expectations": true,
+      "matching_line_count": 16
+    },
+    "oq4e": {
+      "archived_diff_contains_changed_new_expectations": true,
+      "matching_line_count": 10
+    },
+    "glm": {
+      "archived_diff_contains_changed_new_expectations": true,
+      "matching_line_count": 26
+    }
+  },
+  "new_wrapper_end_to_end": {
+    "source_repository": "https://github.com/postgres/postgres.git",
+    "source_revision": "63d9e26c27b9965a78f0d59512a80d84935a7c4b",
+    "source_acquisition": "Fresh Git repository, depth-1 fetch of the exact commit, bounded to 90 seconds",
+    "candidate": "glm",
+    "tests_only": false,
+    "prepare_only": false,
+    "jobs": 2,
+    "cflags": "-O0",
+    "enable_cassert": true,
+    "command": "python3 pruning/verify.py --source <pinned-postgres-git-repository> --work <new-output-directory> --candidate glm --jobs 2",
+    "new_builds_run": true,
+    "inference_run": false,
+    "script_sha256": "93c8aa0c3f2ec658e1f1dd0ab040c42e38cd71ab05924201b479e94cc2679b30",
+    "oracle_sha256": "09c502279d908d74af8c534d1900971fc42eec2db7331ac67136b9771d211732",
+    "candidate_patch_sha256": "e00332c1ecd5fe703be92725e4bebb4e33a56c79d77dc952fe62922cb93bce68",
+    "fixture_patch_sha256": "f1231780a83329814f6fa0f97283db243795e28c4c8674bd71c781485dff024a",
+    "patch_application_pass": true,
+    "configure_exit": 0,
+    "build_exit": 0,
+    "install_exit": 0,
+    "query_check_count": 15,
+    "failed_query_checks": [],
+    "query_expectation_pass": true,
+    "regression_exit": 0,
+    "regression_summary": "# All 231 tests passed.",
+    "wrapper_exit": 0,
+    "pass": true,
+    "scope_note": "This fresh run checks the complete GLM patch. Test-only sensitivity and the other candidates were rechecked against archived artifacts above; their full builds were not repeated during publication."
+  }
+}

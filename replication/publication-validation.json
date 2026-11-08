@@ -1,0 +1,123 @@
+{
+  "date": "2026-11-08",
+  "scope": "New isolated Linux packaging check, separate from historical model runs. No new inference. Full upstream suites were not rerun for this check.",
+  "candidate": "qwen-repaired",
+  "steps": {
+    "apply-fixture": 0,
+    "apply-model": 0,
+    "apply-human-test-repair": 0,
+    "configure": 0,
+    "build": 0,
+    "install": 0,
+    "hybrid-one": 0,
+    "hybrid-two": 0,
+    "hybrid-nested": 0,
+    "queue-only": 0,
+    "serial-file": 0,
+    "nonstreamed": 0,
+    "candidate-tests": 0
+  },
+  "probes": {
+    "hybrid-one": {
+      "mode": "parallel",
+      "segments": 1,
+      "nested": false,
+      "caught_up": true,
+      "expected": "1|10\n10|20",
+      "subscriber": "1|10\n10|20",
+      "subscriber_gate": "",
+      "apply_errors": [],
+      "partial_spool": true,
+      "bytes_before_abort": 20971560,
+      "bytes_after_abort": 0,
+      "pass": true
+    },
+    "hybrid-two": {
+      "mode": "parallel",
+      "segments": 2,
+      "nested": false,
+      "caught_up": true,
+      "expected": "1|10\n10|20",
+      "subscriber": "1|10\n10|20",
+      "subscriber_gate": "",
+      "apply_errors": [],
+      "partial_spool": true,
+      "bytes_before_abort": 41943130,
+      "bytes_after_abort": 0,
+      "pass": true
+    },
+    "hybrid-nested": {
+      "mode": "parallel",
+      "segments": 1,
+      "nested": true,
+      "caught_up": true,
+      "expected": "1|10\n8|80\n9|90\n10|20",
+      "subscriber": "1|10\n8|80\n9|90\n10|20",
+      "subscriber_gate": "",
+      "apply_errors": [],
+      "partial_spool": true,
+      "bytes_before_abort": 20971560,
+      "bytes_after_abort": 0,
+      "pass": true
+    },
+    "queue-only": {
+      "mode": "parallel",
+      "segments": 0,
+      "nested": false,
+      "caught_up": true,
+      "expected": "1|10\n10|20",
+      "subscriber": "1|10\n10|20",
+      "subscriber_gate": "",
+      "apply_errors": [],
+      "partial_spool": false,
+      "bytes_before_abort": null,
+      "bytes_after_abort": null,
+      "pass": true
+    },
+    "serial-file": {
+      "mode": "on",
+      "segments": 1,
+      "nested": false,
+      "caught_up": true,
+      "expected": "1|10\n10|20",
+      "subscriber": "1|10\n10|20",
+      "subscriber_gate": "",
+      "apply_errors": [],
+      "partial_spool": false,
+      "bytes_before_abort": null,
+      "bytes_after_abort": null,
+      "pass": true
+    },
+    "nonstreamed": {
+      "mode": "off",
+      "segments": 1,
+      "nested": false,
+      "caught_up": true,
+      "expected": "1|10\n10|20",
+      "subscriber": "1|10\n10|20",
+      "subscriber_gate": "",
+      "apply_errors": [],
+      "partial_spool": false,
+      "bytes_before_abort": null,
+      "bytes_after_abort": null,
+      "pass": true
+    }
+  },
+  "tap_summary": [
+    "All tests successful.",
+    "Files=1, Tests=4, 14 wallclock secs ( 0.05 usr  0.01 sys +  0.37 cusr  0.48 csys =  0.91 CPU)",
+    "Result: PASS"
+  ],
+  "additional_checks": [
+    "Pinned official source archive SHA-256 verified",
+    "All fixture/reference/model patch chains apply",
+    "Original model patches retained byte-for-byte",
+    "Human test repair reproduces the preserved tested file exactly",
+    "GLM and Qwen tests-only application leaves defective C unchanged",
+    "Python and JSON parsing checks",
+    "Log assertion demonstration",
+    "Nested work directory rejected before writes",
+    "Fresh source Git initialization guard checked independently"
+  ],
+  "note": "The isolated build exercised the public wrapper; the final source-Git-initialization and work-path guards were added during review and checked separately without rebuilding."
+}

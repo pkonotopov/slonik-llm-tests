@@ -1,39 +1,33 @@
-# Slonik 27B patches for a PostgreSQL pruning bug
+# PostgreSQL patch experiments with Slonik, Qwen and GLM
 
-We introduced a small defect into PostgreSQL 18.6 for this experiment. A LIST partition could disappear from a query plan when one arm of an OR matched only the DEFAULT partition. The model received the SQL reproducer and a source snapshot without upstream history.
+Source revisions, prompts, model patches and independent checks for the Slonik 27B MLX experiments of 7–8 November 2026. Each case includes the settings preserved from its runs and recorded results. The patches are experimental candidates for review, including unsuccessful candidates.
 
-The patches apply independently to the same defective snapshot. The table reports the final patches, including the two follow-ups.
+| Case | Models | Recorded outcome | Materials |
+|---|---|---|---|
+| Partition pruning, synthetic defect | Slonik oQ8, oQ6e, oQ4e; GLM oQ4e | All four final patches passed 15 focused checks and 231 core regression tests. Each new test caught the defect without the C fix. Attempts and approval settings differed. | [Instructions](pruning/README.md) · [Settings](pruning/settings.json) · [Results](pruning/results.json) |
+| `UPDATE … RETURNING OLD`, public bug | Slonik oQ8, Qwen 8bit, GLM oQ4e | The three completed repeat runs passed the shared checks. Only the final patches used in the article are included. | [Instructions](returning-old/README.md) · [Settings](returning-old/settings.json) · [Results](returning-old/results.json) |
+| Parallel replication rollback, synthetic defect | Slonik oQ8, Qwen 8bit, GLM oQ4e; additional Qwen run with larger limits | Slonik left protocol errors; initial Qwen produced no patch. GLM and the later Qwen C patches passed the independent scenarios. Qwen's test needed human repair; GLM's own log assertion has a known limitation. | [Instructions](replication/README.md) · [Settings](replication/settings.json) · [Results](replication/results.json) |
 
-| Build | Patch | First attempt | Independent rows and plans | Core regressions |
-|---|---|---|---:|---:|
-| oQ8 | [Diff](patches/oq8.patch) | C fix, test added in a follow-up with auto-approval | 15/15 | 231/231 |
-| oQ6e | [Diff](patches/oq6e.patch) | C fix and regression test | 15/15 | 231/231 |
-| oQ4e | [Diff](patches/oq4e.patch) | Output limit reached before a diff, patch and test on the second attempt | 15/15 | 231/231 |
+## Reproduce the checks
 
-We also applied the SQL and expected-output changes from each final patch to the defective C build. Each new test failed on its own expected output, then passed with the corresponding C fix.
+Follow the case instructions to prepare pinned PostgreSQL sources, apply one candidate, and run focused checks. Each package also describes full-suite and test-sensitivity runs. Use a separate source/build/work directory for each candidate and run PostgreSQL as a non-root user. The scripts create disposable clusters; dependencies are listed per case.
 
-## Reproduce a run
+Patch validation does not require Markov, oMLX, model weights or a private service. Repeating the original model trajectory is a separate task: inference used Markov, an internal Postgres Professional coding agent. Its implementation and raw sessions are not included. The exact prompts and recovered settings describe the experiment and support new runs with another agent; identical output is not promised.
 
-Run this from the root of a fresh clone of this repository, using the usual PostgreSQL build dependencies. Choose one model patch per source and build directory.
+Historical measurements are recorded separately from the release checks in [VALIDATION.md](VALIDATION.md). Missing settings are explicitly unknown; current server defaults are not substituted for historical values.
 
-```sh
-bench="$PWD"
-git clone https://github.com/postgres/postgres.git
-git -C postgres checkout --detach 63d9e26c27b9965a78f0d59512a80d84935a7c4b
-git -C postgres apply "$bench/patches/fixture.patch"
-git -C postgres apply "$bench/patches/oq6e.patch"
+## Read the evidence
 
-mkdir build
-cd build
-CFLAGS=-O0 ../postgres/configure --enable-cassert
-make -j6
-make -j6 install DESTDIR="$PWD/install"
-python3 "$bench/verify.py" "$PWD/install/usr/local/pgsql/bin"
-make -j6 check
-```
+- Model patches are separate from injected defects, reference repairs and human test repairs.
+- A sensitivity run adds a candidate's test to the defective C build. Its expected failure must show the intended symptom, rather than a setup or compilation error.
+- Passing a suite establishes behavior within those checks, not correctness of every code path or readiness to merge.
+- Model time includes agent commands. Loading and independent validation are separate. Input includes cached prefixes and repeated context; output does not split out reasoning tokens.
+- Different limits, reasoning settings and attempts prevent a simple model ranking or an estimate of the effect of fine-tuning.
 
-The verifier starts its own temporary server on a Unix socket and prints row and plan checks as JSON. With just the fixture patch applied, eight checks should fail. On the clean revision and on each final candidate, all 15 should pass.
+[Measurement and provenance notes](METHOD.md) describe the release boundaries. [SHA256SUMS](SHA256SUMS) records file checksums.
 
-The baseline is upstream PostgreSQL at revision `63d9e26c27b9965a78f0d59512a80d84935a7c4b`. The injected defect and the model changes are separate diffs. The [PostgreSQL copyright and license notice](LICENSE) accompanies the upstream code in the patches.
+The original pruning files remain at their existing paths: [fixture](patches/fixture.patch), [oQ8](patches/oq8.patch), [oQ6e](patches/oq6e.patch), [oQ4e](patches/oq4e.patch), and [verifier](verify.py). The new [GLM pruning patch](patches/glm.patch) applies to the same fixture.
 
-[Slonik model and training paper](https://huggingface.co/dglhf/Slonik)
+[Slonik model and training paper](https://huggingface.co/dglhf/Slonik) · [Speed and SQL-queue measurements](https://huggingface.co/kakoka/Slonik-27B-oQ8-mtp/blob/main/BENCHMARK.md)
+
+The [PostgreSQL copyright and license notice](LICENSE) accompanies the upstream code in these patches.

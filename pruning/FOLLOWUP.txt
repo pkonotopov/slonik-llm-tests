@@ -1,0 +1,13 @@
+Continue the PostgreSQL 18 LIST-partition pruning task in /work. Your earlier C patch, if any, has been applied to this workspace. Complete the previously interrupted regression-test steps. Keep the C fix focused and add a targeted core regression test, including its expected output, for the original case below.
+
+CREATE TABLE p(k int, label text) PARTITION BY LIST(k);
+CREATE TABLE p_a PARTITION OF p FOR VALUES IN (1,2);
+CREATE TABLE p_b PARTITION OF p FOR VALUES IN (10,20);
+CREATE TABLE p_null PARTITION OF p FOR VALUES IN (NULL);
+CREATE TABLE p_default PARTITION OF p DEFAULT;
+INSERT INTO p VALUES (1,'a1'),(2,'a2'),(10,'b10'),(20,'b20'),(99,'keep'),(99,'drop'),(NULL,'nil'),(-7,'keep');
+SELECT k,label FROM p WHERE k = 20 OR (k = 99 AND label = 'keep') ORDER BY k,label;
+
+Expected ordered rows: (20,'b20'), (99,'keep'). The plan should scan p_b and p_default and prune the other partitions.
+
+Run /bench/repro and make -C /build -j6 check in the foreground with adequate tool timeouts. /build persists across calls. Background processes and /tmp do not. The workspace shell is isolated and authorized operations through it are approved automatically. Check actual test output, fix the test if necessary, do not commit, and give a short summary of the resulting patch and tests.

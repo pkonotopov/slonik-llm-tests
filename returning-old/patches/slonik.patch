@@ -1,0 +1,103 @@
+diff --git a/src/backend/commands/trigger.c b/src/backend/commands/trigger.c
+index 17f1e22..3165b94 100644
+--- a/src/backend/commands/trigger.c
++++ b/src/backend/commands/trigger.c
+@@ -3023,6 +3023,15 @@ ExecBRUpdateTriggers(EState *estate, EPQState *epqstate,
+ 		{
+ 			TupleTableSlot *epqslot_clean;
+ 
++			/*
++			 * The caller's ri_oldTupleSlot still holds the version of the
++			 * tuple that was current when this UPDATE started, but oldslot now
++			 * holds the most recent version fetched by GetTupleForTrigger.
++			 * Refresh ri_oldTupleSlot so that RETURNING OLD returns the value
++			 * immediately before this update.
++			 */
++			ExecCopySlot(relinfo->ri_oldTupleSlot, oldslot);
++
+ 			epqslot_clean = ExecGetUpdateNewTuple(relinfo, epqslot_candidate,
+ 												  oldslot);
+ 
+diff --git a/src/test/isolation/expected/returning-old-concurrent.out b/src/test/isolation/expected/returning-old-concurrent.out
+new file mode 100644
+index 0000000..0dca722
+--- /dev/null
++++ b/src/test/isolation/expected/returning-old-concurrent.out
+@@ -0,0 +1,15 @@
++Parsed test spec with 2 sessions
++
++starting permutation: s1b s2b s1u s2u s1c s2c
++step s1b: BEGIN;
++step s2b: BEGIN ISOLATION LEVEL READ COMMITTED;
++step s1u: UPDATE returning_old_tbl SET n = n + 10 WHERE id = 1;
++step s2u: UPDATE returning_old_tbl SET n = n + 1 WHERE id = 1 RETURNING OLD.n, NEW.n; <waiting ...>
++step s1c: COMMIT;
++step s2u: <... completed>
++ n| n
++--+--
++17|18
++(1 row)
++
++step s2c: COMMIT;
+diff --git a/src/test/isolation/isolation_schedule b/src/test/isolation/isolation_schedule
+index 204b9e3..db723a5 100644
+--- a/src/test/isolation/isolation_schedule
++++ b/src/test/isolation/isolation_schedule
+@@ -65,6 +65,7 @@ test: multixact-no-forget
+ test: lock-committed-update
+ test: lock-committed-keyupdate
+ test: update-locked-tuple
++test: returning-old-concurrent
+ test: reindex-concurrently
+ test: reindex-concurrently-toast
+ test: reindex-schema
+diff --git a/src/test/isolation/specs/returning-old-concurrent.spec b/src/test/isolation/specs/returning-old-concurrent.spec
+new file mode 100644
+index 0000000..7a502ec
+--- /dev/null
++++ b/src/test/isolation/specs/returning-old-concurrent.spec
+@@ -0,0 +1,44 @@
++# Test that UPDATE ... RETURNING OLD returns the value immediately before
++# this update, even when a BEFORE UPDATE trigger caused us to wait for a
++# concurrent writer and re-fetch the latest tuple version.
++
++setup
++{
++    DROP TABLE IF EXISTS returning_old_tbl;
++    CREATE TABLE returning_old_tbl (id int PRIMARY KEY, n int NOT NULL);
++    INSERT INTO returning_old_tbl VALUES (1, 7);
++
++    CREATE FUNCTION touch_trigger() RETURNS trigger
++      LANGUAGE plpgsql AS $$ BEGIN RETURN NEW; END; $$;
++
++    CREATE TRIGGER touch BEFORE UPDATE ON returning_old_tbl
++      FOR EACH ROW EXECUTE FUNCTION touch_trigger();
++}
++
++teardown
++{
++    DROP TABLE IF EXISTS returning_old_tbl;
++    DROP FUNCTION IF EXISTS touch_trigger();
++}
++
++session s1
++step s1b   { BEGIN; }
++step s1u   { UPDATE returning_old_tbl SET n = n + 10 WHERE id = 1; }
++step s1c   { COMMIT; }
++
++session s2
++step s2b   { BEGIN ISOLATION LEVEL READ COMMITTED; }
++# This UPDATE will block inside GetTupleForTrigger (because of the BEFORE
++# trigger) until s1 commits, since s1 holds an exclusive row lock.  Once it
++# proceeds, OLD.n must be 17 (the value s1 wrote), not the stale 7.
++step s2u   { UPDATE returning_old_tbl SET n = n + 1 WHERE id = 1 RETURNING OLD.n, NEW.n; }
++step s2c   { COMMIT; }
++
++# s1b: start transaction.  s2b: start READ COMMITTED txn.
++# s1u: s1 updates row (n 7 -> 17) and holds the exclusive lock.
++# s2u: s2 attempts its update; blocks waiting for s1's row lock.
++# s1c: s1 commits, releasing the lock; n is now 17.
++# s2u then re-fetches the latest tuple (n=17), computes NEW.n = 18, and
++#     RETURNING must yield OLD.n = 17, NEW.n = 18.
++# s2c: commit.
++permutation s1b s2b s1u s2u s1c s2c

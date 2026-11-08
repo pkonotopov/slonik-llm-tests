@@ -1,0 +1,117 @@
+diff --git a/src/backend/partitioning/partprune.c b/src/backend/partitioning/partprune.c
+index 027a83c..64b864b 100644
+--- a/src/backend/partitioning/partprune.c
++++ b/src/backend/partitioning/partprune.c
+@@ -3659,10 +3659,6 @@ perform_pruning_combine_step(PartitionPruneContext *context,
+ 				step_result = step_results[step_id];
+ 				Assert(step_result != NULL);
+ 
+-				/* Skip steps that contribute no bound offsets. */
+-				if (bms_is_empty(step_result->bound_offsets))
+-					continue;
+-
+ 				/* Record any additional datum indexes from this step */
+ 				result->bound_offsets = bms_add_members(result->bound_offsets,
+ 														step_result->bound_offsets);
+diff --git a/src/test/regress/expected/partition_prune.out b/src/test/regress/expected/partition_prune.out
+index 3c76a88..b4cf649 100644
+--- a/src/test/regress/expected/partition_prune.out
++++ b/src/test/regress/expected/partition_prune.out
+@@ -5106,3 +5106,61 @@ select * from (select a, b from phv_boolpart) t
+ (2 rows)
+ 
+ drop table phv_boolpart;
++-- Test that pruning does not discard OR arms that only select the default
++-- partition (no bound offsets, but scan_default set)
++create table list_default_or (
++	k int,
++	label text
++) partition by list (k);
++create table list_default_or_a partition of list_default_or for values in (1, 2);
++create table list_default_or_b partition of list_default_or for values in (10, 20);
++create table list_default_or_null partition of list_default_or for values in (null);
++create table list_default_or_def partition of list_default_or default;
++insert into list_default_or
++values (1, 'a1'), (2, 'a2'), (10, 'b10'), (20, 'b20'),
++	   (99, 'keep'), (99, 'drop'), (null, 'nil'), (-7, 'keep');
++-- The default partition must be scanned for k = 99, alongside p_b for k = 20
++explain (costs off) select k, label from list_default_or
++  where k = 20 or (k = 99 and label = 'keep') order by k, label;
++                                QUERY PLAN                                 
++---------------------------------------------------------------------------
++ Sort
++   Sort Key: list_default_or.k, list_default_or.label
++   ->  Append
++         ->  Seq Scan on list_default_or_b list_default_or_1
++               Filter: ((k = 20) OR ((k = 99) AND (label = 'keep'::text)))
++         ->  Seq Scan on list_default_or_def list_default_or_2
++               Filter: ((k = 20) OR ((k = 99) AND (label = 'keep'::text)))
++(7 rows)
++
++select k, label from list_default_or
++  where k = 20 or (k = 99 and label = 'keep') order by k, label;
++ k  | label 
++----+-------
++ 20 | b20
++ 99 | keep
++(2 rows)
++
++-- Plain OR of two equalities, the second one matching only the default
++explain (costs off) select k from list_default_or where k = 20 or k = 99;
++                       QUERY PLAN                        
++---------------------------------------------------------
++ Append
++   ->  Seq Scan on list_default_or_b list_default_or_1
++         Filter: ((k = 20) OR (k = 99))
++   ->  Seq Scan on list_default_or_def list_default_or_2
++         Filter: ((k = 20) OR (k = 99))
++(5 rows)
++
++-- Unrelated partitions must still be pruned
++explain (costs off) select k from list_default_or where k = 2 or k = 99;
++                       QUERY PLAN                        
++---------------------------------------------------------
++ Append
++   ->  Seq Scan on list_default_or_a list_default_or_1
++         Filter: ((k = 2) OR (k = 99))
++   ->  Seq Scan on list_default_or_def list_default_or_2
++         Filter: ((k = 2) OR (k = 99))
++(5 rows)
++
++drop table list_default_or;
+diff --git a/src/test/regress/sql/partition_prune.sql b/src/test/regress/sql/partition_prune.sql
+index 01f4453..95ba2a9 100644
+--- a/src/test/regress/sql/partition_prune.sql
++++ b/src/test/regress/sql/partition_prune.sql
+@@ -1605,3 +1605,31 @@ select * from (select a, b from phv_boolpart) t
+   group by grouping sets (a, b);
+ 
+ drop table phv_boolpart;
++
++-- Test that pruning does not discard OR arms that only select the default
++-- partition (no bound offsets, but scan_default set)
++create table list_default_or (
++	k int,
++	label text
++) partition by list (k);
++create table list_default_or_a partition of list_default_or for values in (1, 2);
++create table list_default_or_b partition of list_default_or for values in (10, 20);
++create table list_default_or_null partition of list_default_or for values in (null);
++create table list_default_or_def partition of list_default_or default;
++insert into list_default_or
++values (1, 'a1'), (2, 'a2'), (10, 'b10'), (20, 'b20'),
++	   (99, 'keep'), (99, 'drop'), (null, 'nil'), (-7, 'keep');
++
++-- The default partition must be scanned for k = 99, alongside p_b for k = 20
++explain (costs off) select k, label from list_default_or
++  where k = 20 or (k = 99 and label = 'keep') order by k, label;
++select k, label from list_default_or
++  where k = 20 or (k = 99 and label = 'keep') order by k, label;
++
++-- Plain OR of two equalities, the second one matching only the default
++explain (costs off) select k from list_default_or where k = 20 or k = 99;
++
++-- Unrelated partitions must still be pruned
++explain (costs off) select k from list_default_or where k = 2 or k = 99;
++
++drop table list_default_or;

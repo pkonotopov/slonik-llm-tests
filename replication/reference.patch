@@ -1,0 +1,55 @@
+--- a/src/backend/replication/logical/worker.c
++++ b/src/backend/replication/logical/worker.c
+@@ -1908,21 +1908,15 @@
+ 					elog(ERROR, "invalid partial stream boundary length %d", len);
+ 				BufFileReadExact(fd, body, len - 1);
+ 				consumed = len;
+-				if (action == LOGICAL_REP_MSG_STREAM_STOP)
+-					saw_stop = true;
+-				else
+-				{
+-					appendBinaryStringInfo(&frames, (char *) &len, sizeof(len));
+-					appendStringInfoCharMacro(&frames, action);
+-					appendBinaryStringInfo(&frames, body, len - 1);
+-				}
++				appendBinaryStringInfo(&frames, (char *) &len, sizeof(len));
++				appendStringInfoCharMacro(&frames, action);
++				appendBinaryStringInfo(&frames, body, len - 1);
+ 			}
+ 		}
+ 		else
+ 		{
+ 			cutfile = -1;
+ 			resetStringInfo(&frames);
+-			saw_stop = false;
+ 		}
+ 
+ 		if (len > consumed && BufFileSeek(fd, 0, len - consumed, SEEK_CUR) != 0)
+@@ -1935,14 +1929,6 @@
+ 		if (BufFileSeek(fd, 0, 0, SEEK_END) != 0)
+ 			elog(ERROR, "could not seek to end of partial stream file");
+ 		BufFileWrite(fd, frames.data, frames.len);
+-		if (saw_stop)
+-		{
+-			int			len = 1;
+-			char		action = LOGICAL_REP_MSG_STREAM_STOP;
+-
+-			BufFileWrite(fd, &len, sizeof(len));
+-			BufFileWrite(fd, &action, sizeof(action));
+-		}
+ 	}
+ 	BufFileClose(fd);
+ 	pfree(frames.data);
+@@ -2068,10 +2054,8 @@
+ 		case TRANS_LEADER_PARTIAL_SERIALIZE:
+ 			Assert(winfo);
+ 
+-			/* Compact an aborted batch before appending more changes. */
+-			if (!toplevel_xact && !stream_fd &&
+-				compact_stream_suffix(xid, subxid))
+-				break;
++			if (!toplevel_xact && !stream_fd)
++				(void) compact_stream_suffix(xid, subxid);
+ 
+ 			/*
+ 			 * Parallel apply worker might have applied some changes, so write

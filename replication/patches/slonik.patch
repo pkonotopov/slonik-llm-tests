@@ -1,0 +1,162 @@
+diff --git a/src/backend/replication/logical/worker.c b/src/backend/replication/logical/worker.c
+index a2c690d..6c39845 100644
+--- a/src/backend/replication/logical/worker.c
++++ b/src/backend/replication/logical/worker.c
+@@ -1843,12 +1843,12 @@ compact_stream_suffix(TransactionId xid, TransactionId subxid)
+ {
+ 	char		path[MAXPGPATH];
+ 	BufFile    *fd;
+-	StringInfoData frames;
+ 	int			cutfile = -1;
+ 	off_t		cutoffset = 0;
+ 	int64		before;
+ 	int64		after;
+-	bool		saw_stop = false;
++	bool		cut_in_block = false;
++	bool		in_block = false;
+ 
+ 	Assert(!in_streamed_transaction && !stream_fd);
+ 
+@@ -1857,7 +1857,6 @@ compact_stream_suffix(TransactionId xid, TransactionId subxid)
+ 	fd = BufFileOpenFileSet(MyLogicalRepWorker->stream_fileset, path,
+ 							O_RDWR, false);
+ 	before = BufFileSize(fd);
+-	initStringInfo(&frames);
+ 
+ 	for (;;)
+ 	{
+@@ -1874,6 +1873,7 @@ compact_stream_suffix(TransactionId xid, TransactionId subxid)
+ 		if (len <= 0)
+ 			elog(ERROR, "invalid partial stream record length %d", len);
+ 		BufFileReadExact(fd, &action, sizeof(action));
++
+ 		if (action == LOGICAL_REP_MSG_INSERT ||
+ 			action == LOGICAL_REP_MSG_UPDATE ||
+ 			action == LOGICAL_REP_MSG_DELETE)
+@@ -1887,19 +1887,27 @@ compact_stream_suffix(TransactionId xid, TransactionId subxid)
+ 			initReadOnlyStringInfo(&msg, rawxid, sizeof(rawxid));
+ 			discard = pq_getmsgint(&msg, sizeof(rawxid)) == subxid;
+ 			consumed += sizeof(rawxid);
+-		}
+ 
+-		if (discard)
+-		{
+-			if (cutfile < 0)
++			if (discard)
+ 			{
+-				cutfile = fileno;
+-				cutoffset = offset;
++				if (cutfile < 0)
++				{
++					cutfile = fileno;
++					cutoffset = offset;
++					cut_in_block = in_block;
++				}
++			}
++			else
++			{
++				/* A record from another subtransaction ends the run. */
++				cutfile = -1;
+ 			}
+ 		}
+-		else if (action == LOGICAL_REP_MSG_STREAM_STOP ||
+-				 action == LOGICAL_REP_MSG_STREAM_START)
++		else if (action == LOGICAL_REP_MSG_STREAM_STOP)
+ 		{
++			if (in_block)
++				in_block = false;
++
+ 			if (cutfile >= 0)
+ 			{
+ 				char		body[sizeof(uint32) + 1];
+@@ -1908,21 +1916,27 @@ compact_stream_suffix(TransactionId xid, TransactionId subxid)
+ 					elog(ERROR, "invalid partial stream boundary length %d", len);
+ 				BufFileReadExact(fd, body, len - 1);
+ 				consumed = len;
+-				if (action == LOGICAL_REP_MSG_STREAM_STOP)
+-					saw_stop = true;
+-				else
+-				{
+-					appendBinaryStringInfo(&frames, (char *) &len, sizeof(len));
+-					appendStringInfoCharMacro(&frames, action);
+-					appendBinaryStringInfo(&frames, body, len - 1);
+-				}
++			}
++			else
++			{
++				if (len > 1 && BufFileSeek(fd, 0, len - 1, SEEK_CUR) != 0)
++					elog(ERROR, "could not seek in partial stream file");
++				consumed = len;
+ 			}
+ 		}
++		else if (action == LOGICAL_REP_MSG_STREAM_START)
++		{
++			in_block = true;
++
++			if (len > 1 && BufFileSeek(fd, 0, len - 1, SEEK_CUR) != 0)
++				elog(ERROR, "could not seek in partial stream file");
++			consumed = len;
++		}
+ 		else
+ 		{
+-			cutfile = -1;
+-			resetStringInfo(&frames);
+-			saw_stop = false;
++			if (len > 1 && BufFileSeek(fd, 0, len - 1, SEEK_CUR) != 0)
++				elog(ERROR, "could not seek in partial stream file");
++			consumed = len;
+ 		}
+ 
+ 		if (len > consumed && BufFileSeek(fd, 0, len - consumed, SEEK_CUR) != 0)
+@@ -1932,30 +1946,34 @@ compact_stream_suffix(TransactionId xid, TransactionId subxid)
+ 	if (cutfile >= 0)
+ 	{
+ 		BufFileTruncateFileSet(fd, cutfile, cutoffset);
+-		if (BufFileSeek(fd, 0, 0, SEEK_END) != 0)
+-			elog(ERROR, "could not seek to end of partial stream file");
+-		BufFileWrite(fd, frames.data, frames.len);
+-		if (saw_stop)
++
++		if (cut_in_block)
+ 		{
+ 			int			len = 1;
+ 			char		action = LOGICAL_REP_MSG_STREAM_STOP;
+ 
++			if (BufFileSeek(fd, 0, 0, SEEK_END) != 0)
++				elog(ERROR, "could not seek to end of partial stream file");
++
+ 			BufFileWrite(fd, &len, sizeof(len));
+ 			BufFileWrite(fd, &action, sizeof(action));
+ 		}
+ 	}
++
+ 	BufFileClose(fd);
+-	pfree(frames.data);
+ 
+ 	fd = BufFileOpenFileSet(MyLogicalRepWorker->stream_fileset, path,
+ 							O_RDONLY, false);
+ 	after = BufFileSize(fd);
+ 	BufFileClose(fd);
++
+ 	end_replication_step();
+ 	CommitTransactionCommand();
++
+ 	if (after < before)
+ 		elog(DEBUG1, "reclaimed " INT64_FORMAT " bytes from partial stream for transaction %u",
+ 			 before - after, xid);
++
+ 	return after < before;
+ }
+ 
+@@ -2069,9 +2087,8 @@ apply_handle_stream_abort(StringInfo s)
+ 			Assert(winfo);
+ 
+ 			/* Compact an aborted batch before appending more changes. */
+-			if (!toplevel_xact && !stream_fd &&
+-				compact_stream_suffix(xid, subxid))
+-				break;
++			if (!toplevel_xact && !stream_fd)
++				compact_stream_suffix(xid, subxid);
+ 
+ 			/*
+ 			 * Parallel apply worker might have applied some changes, so write

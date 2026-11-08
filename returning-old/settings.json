@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "scope": "Historical settings for the three completed repeat runs used in the v3 article. No current live defaults have been substituted.",
+  "models": {
+    "slonik": {
+      "served_model_id": "Slonik-27B-oQ8-mtp",
+      "native_telemetry_aliases": [
+        "Slonik-27B-oQ8-mtp",
+        "27B-oQ8-mtp"
+      ],
+      "artifact_url": "https://huggingface.co/kakoka/Slonik-27B-oQ8-mtp",
+      "artifact_revision": null,
+      "source_checkpoint": {
+        "repository": "dglhf/Slonik",
+        "revision": "321d879c39a809057f324a8133c9484e4c192c06",
+        "subdirectory": "27B",
+        "note": "BF16 input to the published quantization; not a revision or checksum of the serving artifact."
+      },
+      "context_limit_tokens": 131072,
+      "server_output_limit_tokens": 16384,
+      "request_parameters": {
+        "stream": true,
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "repetition_penalty": 1.15,
+        "chat_template_kwargs": {
+          "enable_thinking": true
+        },
+        "thinking_budget": 192
+      },
+      "request_evidence": "Retained provider configuration and a retained serialized model request from this completed run.",
+      "server_profile_enable_thinking": null,
+      "thinking_budget_enforcement_verified": false,
+      "reasoning_observation": "Structured thinking blocks exist in the saved session."
+    },
+    "qwen": {
+      "served_model_id": "Qwen3.8-27B-8bit",
+      "artifact_url": null,
+      "artifact_revision": null,
+      "context_limit_tokens": 32768,
+      "server_output_limit_tokens": 8192,
+      "request_parameters": {
+        "stream": true
+      },
+      "thinking_override_sent": false,
+      "server_profile_enable_thinking": false,
+      "request_evidence": "Historical run audit and retained generation telemetry. A full serialized request/provider snapshot was not retained in the reviewed package.",
+      "reasoning_observation": "No thinking blocks were found in the reviewed sample of early responses; this is not an inspection of every response."
+    },
+    "glm": {
+      "served_model_id": "GLM-5.3-Flash-oQ4e-mtp",
+      "artifact_url": "https://huggingface.co/Jundot/GLM-5.3-Flash-oQ4e-mtp",
+      "artifact_revision": null,
+      "context_limit_tokens": 131072,
+      "server_output_limit_tokens": 16384,
+      "request_parameters": {
+        "stream": true,
+        "reasoning_effort": "high",
+        "chat_template_kwargs": {
+          "reasoning_effort": "high",
+          "clear_thinking": true
+        }
+      },
+      "request_evidence": "Retained provider configuration and a retained serialized model request from this completed run. Sampling parameters are absent from that request.",
+      "server_profile_enable_thinking": null,
+      "reasoning_observation": "Structured thinking blocks exist in the saved session."
+    }
+  },
+  "harness": {
+    "name": "Markov, the internal Postgres Professional coding agent",
+    "publicly_reproducible_scope": "The patches and their independent PostgreSQL checks can be reproduced without Markov. The original agent runs require the internal agent and its provider integration.",
+    "prompt_file": "PROMPT.txt",
+    "tool": "One supplied shell tool operating on the isolated source and persistent build directories.",
+    "network_access_in_tool_workspace": false,
+    "approval_policy": "Automatic approval for valid calls to the supplied isolated shell.",
+    "memory_features": false,
+    "system_instruction": "Use only the supplied isolated shell. Follow PostgreSQL C style. Do not delegate or commit."
+  },
+  "accounting": {
+    "model_responses": "Completed oMLX responses for the task, excluding one startup probe.",
+    "input_tokens": "Includes cached prefixes and context sent again on later calls.",
+    "output_tokens": "Combined output; the collected data has no separate reasoning-token counter.",
+    "markov_seconds": "Whole agent session, including commands, with model loading and independent validation measured separately."
+  },
+  "limits": [
+    "The context and output limits are recorded historical configuration values; they are not estimates inferred from the largest response.",
+    "Slonik thinking_budget=192 is a sent request parameter. Its enforcement by the model server was not independently verified.",
+    "The exact immutable revisions/checksums of the three serving artifacts were not captured in the reviewed run evidence.",
+    "Unlisted sampling parameters, random seeds, the exact inference-server build and effective Lightning MTP enablement were not established for these runs. The mtp suffix alone does not prove that MTP was enabled.",
+    "The models used different thinking, context and output settings. These single runs do not isolate model quality or the effect of fine-tuning."
+  ]
+}

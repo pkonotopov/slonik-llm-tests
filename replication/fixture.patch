@@ -1,0 +1,148 @@
+--- a/src/backend/replication/logical/worker.c
++++ b/src/backend/replication/logical/worker.c
+@@ -1832,6 +1832,133 @@
+ 	}
+ }
+ 
++
++/*
++ * Reclaim an aborted suffix of the partial-serialization spool. Only DML
++ * records belonging to the aborted subtransaction may be discarded here.
++ * A record from any other subtransaction or a metadata record ends the run.
++ */
++static bool
++compact_stream_suffix(TransactionId xid, TransactionId subxid)
++{
++	char		path[MAXPGPATH];
++	BufFile    *fd;
++	StringInfoData frames;
++	int			cutfile = -1;
++	off_t		cutoffset = 0;
++	int64		before;
++	int64		after;
++	bool		saw_stop = false;
++
++	Assert(!in_streamed_transaction && !stream_fd);
++
++	begin_replication_step();
++	changes_filename(path, MyLogicalRepWorker->subid, xid);
++	fd = BufFileOpenFileSet(MyLogicalRepWorker->stream_fileset, path,
++							O_RDWR, false);
++	before = BufFileSize(fd);
++	initStringInfo(&frames);
++
++	for (;;)
++	{
++		int			fileno;
++		off_t		offset;
++		int			len;
++		char		action;
++		int			consumed = 1;
++		bool		discard = false;
++
++		BufFileTell(fd, &fileno, &offset);
++		if (BufFileReadMaybeEOF(fd, &len, sizeof(len), true) == 0)
++			break;
++		if (len <= 0)
++			elog(ERROR, "invalid partial stream record length %d", len);
++		BufFileReadExact(fd, &action, sizeof(action));
++		if (action == LOGICAL_REP_MSG_INSERT ||
++			action == LOGICAL_REP_MSG_UPDATE ||
++			action == LOGICAL_REP_MSG_DELETE)
++		{
++			char		rawxid[sizeof(uint32)];
++			StringInfoData msg;
++
++			if (len < 1 + sizeof(rawxid))
++				elog(ERROR, "partial stream record has no transaction ID");
++			BufFileReadExact(fd, rawxid, sizeof(rawxid));
++			initReadOnlyStringInfo(&msg, rawxid, sizeof(rawxid));
++			discard = pq_getmsgint(&msg, sizeof(rawxid)) == subxid;
++			consumed += sizeof(rawxid);
++		}
++
++		if (discard)
++		{
++			if (cutfile < 0)
++			{
++				cutfile = fileno;
++				cutoffset = offset;
++			}
++		}
++		else if (action == LOGICAL_REP_MSG_STREAM_STOP ||
++				 action == LOGICAL_REP_MSG_STREAM_START)
++		{
++			if (cutfile >= 0)
++			{
++				char		body[sizeof(uint32) + 1];
++
++				if (len - 1 > sizeof(body))
++					elog(ERROR, "invalid partial stream boundary length %d", len);
++				BufFileReadExact(fd, body, len - 1);
++				consumed = len;
++				if (action == LOGICAL_REP_MSG_STREAM_STOP)
++					saw_stop = true;
++				else
++				{
++					appendBinaryStringInfo(&frames, (char *) &len, sizeof(len));
++					appendStringInfoCharMacro(&frames, action);
++					appendBinaryStringInfo(&frames, body, len - 1);
++				}
++			}
++		}
++		else
++		{
++			cutfile = -1;
++			resetStringInfo(&frames);
++			saw_stop = false;
++		}
++
++		if (len > consumed && BufFileSeek(fd, 0, len - consumed, SEEK_CUR) != 0)
++			elog(ERROR, "could not seek in partial stream file");
++	}
++
++	if (cutfile >= 0)
++	{
++		BufFileTruncateFileSet(fd, cutfile, cutoffset);
++		if (BufFileSeek(fd, 0, 0, SEEK_END) != 0)
++			elog(ERROR, "could not seek to end of partial stream file");
++		BufFileWrite(fd, frames.data, frames.len);
++		if (saw_stop)
++		{
++			int			len = 1;
++			char		action = LOGICAL_REP_MSG_STREAM_STOP;
++
++			BufFileWrite(fd, &len, sizeof(len));
++			BufFileWrite(fd, &action, sizeof(action));
++		}
++	}
++	BufFileClose(fd);
++	pfree(frames.data);
++
++	fd = BufFileOpenFileSet(MyLogicalRepWorker->stream_fileset, path,
++							O_RDONLY, false);
++	after = BufFileSize(fd);
++	BufFileClose(fd);
++	end_replication_step();
++	CommitTransactionCommand();
++	if (after < before)
++		elog(DEBUG1, "reclaimed " INT64_FORMAT " bytes from partial stream for transaction %u",
++			 before - after, xid);
++	return after < before;
++}
++
+ /*
+  * Handle STREAM ABORT message.
+  */
+@@ -1940,6 +2067,11 @@
+ 			/* fall through */
+ 		case TRANS_LEADER_PARTIAL_SERIALIZE:
+ 			Assert(winfo);
++
++			/* Compact an aborted batch before appending more changes. */
++			if (!toplevel_xact && !stream_fd &&
++				compact_stream_suffix(xid, subxid))
++				break;
+ 
+ 			/*
+ 			 * Parallel apply worker might have applied some changes, so write

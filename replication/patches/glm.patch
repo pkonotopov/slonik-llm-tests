@@ -1,0 +1,333 @@
+diff --git a/src/backend/replication/logical/worker.c b/src/backend/replication/logical/worker.c
+index a2c690d..6fc442d 100644
+--- a/src/backend/replication/logical/worker.c
++++ b/src/backend/replication/logical/worker.c
+@@ -1834,21 +1834,25 @@ stream_abort_internal(TransactionId xid, TransactionId subxid)
+ 
+ 
+ /*
+- * Reclaim an aborted suffix of the partial-serialization spool. Only DML
+- * records belonging to the aborted subtransaction may be discarded here.
+- * A record from any other subtransaction or a metadata record ends the run.
++ * Reclaim the disk space consumed by an aborted suffix of the
++ * partial-serialization spool.
++ *
++ * Only changes belonging to the aborted subtransaction can be discarded
++ * here: the scan stops at any other change or at a metadata record, so no
++ * live change can be lost.  Streaming blocks that contained only the aborted
++ * changes are dropped entirely, and a single STREAM STOP record is appended
++ * to close the interrupted streaming block so that the spool remains
++ * replayable by the parallel apply worker.
+  */
+-static bool
++static void
+ compact_stream_suffix(TransactionId xid, TransactionId subxid)
+ {
+ 	char		path[MAXPGPATH];
+ 	BufFile    *fd;
+-	StringInfoData frames;
+ 	int			cutfile = -1;
+ 	off_t		cutoffset = 0;
+ 	int64		before;
+ 	int64		after;
+-	bool		saw_stop = false;
+ 
+ 	Assert(!in_streamed_transaction && !stream_fd);
+ 
+@@ -1857,7 +1861,6 @@ compact_stream_suffix(TransactionId xid, TransactionId subxid)
+ 	fd = BufFileOpenFileSet(MyLogicalRepWorker->stream_fileset, path,
+ 							O_RDWR, false);
+ 	before = BufFileSize(fd);
+-	initStringInfo(&frames);
+ 
+ 	for (;;)
+ 	{
+@@ -1888,41 +1891,17 @@ compact_stream_suffix(TransactionId xid, TransactionId subxid)
+ 			discard = pq_getmsgint(&msg, sizeof(rawxid)) == subxid;
+ 			consumed += sizeof(rawxid);
+ 		}
+-
+-		if (discard)
+-		{
+-			if (cutfile < 0)
+-			{
+-				cutfile = fileno;
+-				cutoffset = offset;
+-			}
+-		}
+-		else if (action == LOGICAL_REP_MSG_STREAM_STOP ||
+-				 action == LOGICAL_REP_MSG_STREAM_START)
++		else if (action != LOGICAL_REP_MSG_STREAM_STOP &&
++				 action != LOGICAL_REP_MSG_STREAM_START)
+ 		{
+-			if (cutfile >= 0)
+-			{
+-				char		body[sizeof(uint32) + 1];
+-
+-				if (len - 1 > sizeof(body))
+-					elog(ERROR, "invalid partial stream boundary length %d", len);
+-				BufFileReadExact(fd, body, len - 1);
+-				consumed = len;
+-				if (action == LOGICAL_REP_MSG_STREAM_STOP)
+-					saw_stop = true;
+-				else
+-				{
+-					appendBinaryStringInfo(&frames, (char *) &len, sizeof(len));
+-					appendStringInfoCharMacro(&frames, action);
+-					appendBinaryStringInfo(&frames, body, len - 1);
+-				}
+-			}
++			/* a record that must be kept ends the reclaimable run */
++			cutfile = -1;
+ 		}
+-		else
++
++		if (discard && cutfile < 0)
+ 		{
+-			cutfile = -1;
+-			resetStringInfo(&frames);
+-			saw_stop = false;
++			cutfile = fileno;
++			cutoffset = offset;
+ 		}
+ 
+ 		if (len > consumed && BufFileSeek(fd, 0, len - consumed, SEEK_CUR) != 0)
+@@ -1931,21 +1910,18 @@ compact_stream_suffix(TransactionId xid, TransactionId subxid)
+ 
+ 	if (cutfile >= 0)
+ 	{
++		int			len = 1;
++		char		action = LOGICAL_REP_MSG_STREAM_STOP;
++
+ 		BufFileTruncateFileSet(fd, cutfile, cutoffset);
+ 		if (BufFileSeek(fd, 0, 0, SEEK_END) != 0)
+ 			elog(ERROR, "could not seek to end of partial stream file");
+-		BufFileWrite(fd, frames.data, frames.len);
+-		if (saw_stop)
+-		{
+-			int			len = 1;
+-			char		action = LOGICAL_REP_MSG_STREAM_STOP;
+ 
+-			BufFileWrite(fd, &len, sizeof(len));
+-			BufFileWrite(fd, &action, sizeof(action));
+-		}
++		/* close the interrupted streaming block */
++		BufFileWrite(fd, &len, sizeof(len));
++		BufFileWrite(fd, &action, sizeof(action));
+ 	}
+ 	BufFileClose(fd);
+-	pfree(frames.data);
+ 
+ 	fd = BufFileOpenFileSet(MyLogicalRepWorker->stream_fileset, path,
+ 							O_RDONLY, false);
+@@ -1953,10 +1929,10 @@ compact_stream_suffix(TransactionId xid, TransactionId subxid)
+ 	BufFileClose(fd);
+ 	end_replication_step();
+ 	CommitTransactionCommand();
++
+ 	if (after < before)
+ 		elog(DEBUG1, "reclaimed " INT64_FORMAT " bytes from partial stream for transaction %u",
+ 			 before - after, xid);
+-	return after < before;
+ }
+ 
+ /*
+@@ -2068,10 +2044,15 @@ apply_handle_stream_abort(StringInfo s)
+ 		case TRANS_LEADER_PARTIAL_SERIALIZE:
+ 			Assert(winfo);
+ 
+-			/* Compact an aborted batch before appending more changes. */
+-			if (!toplevel_xact && !stream_fd &&
+-				compact_stream_suffix(xid, subxid))
+-				break;
++			/*
++			 * Reclaim the space consumed by an aborted batch before appending
++			 * more changes to the spool.  The parallel apply worker must still
++			 * learn about the abort, because it might have applied some of the
++			 * aborted changes already, so fall through to write the
++			 * STREAM_ABORT message below in any case.
++			 */
++			if (!toplevel_xact && !stream_fd)
++				compact_stream_suffix(xid, subxid);
+ 
+ 			/*
+ 			 * Parallel apply worker might have applied some changes, so write
+diff --git a/src/test/subscription/meson.build b/src/test/subscription/meson.build
+index 586ffba..2d7a375 100644
+--- a/src/test/subscription/meson.build
++++ b/src/test/subscription/meson.build
+@@ -42,6 +42,7 @@ tests += {
+       't/033_run_as_table_owner.pl',
+       't/034_temporal.pl',
+       't/035_conflicts.pl',
++      't/036_stream_partial_serialize_reclaim.pl',
+       't/100_bugs.pl',
+     ],
+   },
+diff --git a/src/test/subscription/t/036_stream_partial_serialize_reclaim.pl b/src/test/subscription/t/036_stream_partial_serialize_reclaim.pl
+new file mode 100644
+index 0000000..d830c93
+--- /dev/null
++++ b/src/test/subscription/t/036_stream_partial_serialize_reclaim.pl
+@@ -0,0 +1,161 @@
++
++# Copyright (c) 2025, PostgreSQL Global Development Group
++
++# Test that an aborted suffix of a partially serialized streaming transaction
++# is reclaimed from the spool file while the outer transaction is still open,
++# without breaking the replay of the spooled changes by the parallel apply
++# worker.
++use strict;
++use warnings FATAL => 'all';
++use PostgreSQL::Test::Cluster;
++use PostgreSQL::Test::Utils;
++use Test::More;
++
++my $publisher = PostgreSQL::Test::Cluster->new('publisher');
++$publisher->init(allows_streaming => 'logical');
++$publisher->append_conf('postgresql.conf',
++	'debug_logical_replication_streaming = immediate');
++$publisher->start;
++
++my $subscriber = PostgreSQL::Test::Cluster->new('subscriber');
++$subscriber->init;
++$subscriber->append_conf('postgresql.conf', 'log_min_messages = debug1');
++$subscriber->start;
++
++my $appname   = 'tap_sub';
++my $publisher_connstr = $publisher->connstr . ' dbname=postgres';
++
++$publisher->safe_psql('postgres',
++	'CREATE TABLE tab (a int PRIMARY KEY, payload text);
++	 CREATE TABLE gate (a int PRIMARY KEY);');
++$subscriber->safe_psql('postgres',
++	'CREATE TABLE tab (a int PRIMARY KEY, payload text);
++	 CREATE TABLE gate (a int PRIMARY KEY);');
++
++$publisher->safe_psql('postgres',
++	'CREATE PUBLICATION tap_pub FOR TABLE tab, gate');
++$subscriber->safe_psql('postgres',
++	"CREATE SUBSCRIPTION $appname CONNECTION '$publisher_connstr application_name=$appname' PUBLICATION tap_pub WITH (streaming = parallel, copy_data = false)"
++);
++
++$subscriber->wait_for_subscription_sync($publisher, $appname);
++
++# Total size of the subscriber's spool files.
++my $spool_dir = $subscriber->data_dir . '/base/pgsql_tmp';
++my $spool_bytes = sub {
++	my $total = 0;
++	return 0 unless -d $spool_dir;
++	opendir(my $dh, $spool_dir) or return 0;
++	for my $entry (readdir($dh))
++	{
++		next if $entry eq '.' or $entry eq '..';
++		if (-f "$spool_dir/$entry" && $entry =~ /\.changes\./)
++		{
++			$total += -s "$spool_dir/$entry";
++		}
++		elsif (-d _)
++		{
++			opendir(my $sdh, "$spool_dir/$entry") or next;
++			for my $file (grep { /\.changes\./ } readdir($sdh))
++			{
++				$total += -s "$spool_dir/$entry/$file";
++			}
++			closedir($sdh);
++		}
++	}
++	closedir($dh);
++	return $total;
++};
++
++is($spool_bytes->(), 0, 'no spool files at start');
++
++my $offset = -s $subscriber->logfile;
++
++# Start a streamed transaction which is handed to a parallel apply worker,
++# then block the worker on a lock held by another session, so that the leader
++# has to serialize the rest of the transaction to a file.
++my $pub_session = $publisher->background_psql('postgres');
++my $sub_session = $subscriber->background_psql('postgres');
++
++$pub_session->query_safe(
++	q{
++BEGIN;
++SAVEPOINT outer_sp;
++INSERT INTO tab VALUES (1, NULL);
++SELECT pg_logical_emit_message(false, 'flush', '', true);
++});
++
++# Wait for the parallel apply worker to process the first streaming block.
++$subscriber->wait_for_log(
++	qr/DEBUG: ( [A-Z0-9]+:)? defining savepoint/,
++	$offset);
++
++$sub_session->query_safe( 'BEGIN; LOCK gate IN ACCESS EXCLUSIVE MODE;');
++
++# Wait until the parallel apply worker is blocked on the gate lock.
++$subscriber->poll_query_until(
++	'postgres',
++	"SELECT EXISTS (SELECT 1 FROM pg_stat_subscription
++	              WHERE leader_pid IS NOT NULL
++	                AND cardinality(pg_blocking_pids(pid)) > 0)")
++  or die "timed out waiting for the parallel apply worker to block";
++
++# The parallel apply worker is blocked now; the next big streamed block is
++# serialized to a file.
++$offset = -s $subscriber->logfile;
++$pub_session->query_safe(
++	q{
++SAVEPOINT sp;
++INSERT INTO gate VALUES (1);
++INSERT INTO tab VALUES (2, repeat('x', 20 * 1024 * 1024));
++SELECT pg_logical_emit_message(false, 'flush', '', true);
++});
++
++# Ensure that the changes are serialized.
++$subscriber->wait_for_log(
++	qr/LOG: ( [A-Z0-9]+:)? logical replication apply worker will serialize the remaining changes of remote transaction \d+ to a file/,
++	$offset);
++
++ok($spool_bytes->() > 4 * 1024 * 1024, 'spool file holds the serialized changes'
++);
++
++# Rolling back to the savepoint aborts the serialized changes, and the leader
++# must reclaim the space in the spool file while the outer transaction is
++# still open.
++$offset = -s $subscriber->logfile;
++$pub_session->query_safe( 'ROLLBACK TO sp;');
++
++$subscriber->wait_for_log(
++	qr/DEBUG: ( [A-Z0-9]+:)? reclaimed \d+ bytes from partial stream/,
++	$offset);
++
++ok($spool_bytes->() < 4 * 1024 * 1024,
++	'spool file was truncated after the abort');
++
++# Unblock the parallel apply worker and finish the transaction.
++$sub_session->query_safe( 'COMMIT;');
++$pub_session->query_safe(
++	q{
++INSERT INTO tab VALUES (3, NULL);
++COMMIT;
++});
++
++$publisher->wait_for_catchup($appname);
++
++# The aborted batch must not have been applied, and the spool must be gone.
++my $result = $subscriber->safe_psql('postgres', 'SELECT a FROM tab ORDER BY 1');
++is($result, "1\n3", 'aborted subtransaction was not applied');
++
++$result = $subscriber->safe_psql('postgres', 'SELECT count(*) FROM gate');
++is($result, '0', 'aborted gate insert was not applied');
++
++is($spool_bytes->(), 0, 'no spool files left after commit');
++
++# Make sure the apply worker did not hit any error meanwhile.
++my $log = slurp_file($subscriber->logfile, $offset);
++ok($log !~ /^ERROR:/ms, 'no errors in subscriber log');
++
++$pub_session->quit;
++$sub_session->quit;
++
++done_testing();

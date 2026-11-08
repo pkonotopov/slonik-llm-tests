@@ -1,0 +1,36 @@
+{
+  "recorded_date": "2026-11-08",
+  "provenance": "Recovered verbatim from the preserved author-repaired TAP test used for the article; no new test repair was made for publication.",
+  "test_sha256": "77de00fb1a57bdd9a2b7588102fdc2541d56e595fc7bb120712a8aca3eece726",
+  "original_model_test_sha256": "b196286c7c4d077f9912beed696b41d4f85a1e3667e337d3f9deb6e4a77656f5",
+  "candidate": {
+    "c_patch": "qwen-131072",
+    "tests": 4,
+    "passed": 4,
+    "failed": 0,
+    "exit_status": 0,
+    "result": "PASS"
+  },
+  "defective_baseline": {
+    "tests": 4,
+    "passed": 1,
+    "failed": 3,
+    "exit_status": 1,
+    "result": "FAIL",
+    "failed_assertions": [
+      1,
+      3,
+      4
+    ],
+    "symptoms": [
+      "incorrect ordered rows / gate count",
+      "duplicate STREAM START message",
+      "logical replication parallel apply worker exited due to error"
+    ]
+  },
+  "same_test_bytes_on_both_builds": true,
+  "publication_validation": [
+    "repair patch applies to the original model test",
+    "applied repair is byte-identical to the preserved tested file"
+  ]
+}

@@ -1,0 +1,665 @@
+{
+  "recorded_dates": [
+    "2026-11-07",
+    "2026-11-08"
+  ],
+  "description": "Historical benchmark measurements, not a new inference run. Agent end_turn means the agent stopped, not that its patch passed validation.",
+  "token_accounting": "Completed oMLX responses reconciled with the Markov ledger; one short startup probe excluded per run. Input includes cached and repeated context.",
+  "models": {
+    "slonik": {
+      "model": "Slonik-27B-oQ8-mtp",
+      "stop_reason": "end_turn",
+      "turns_started": 1,
+      "markov_seconds": 3253.18,
+      "cold_load_seconds": 2.08,
+      "validation_seconds": 227.18,
+      "patch_bytes": 4693,
+      "patch_sha256": "3a18fc4659dff3ea7c2da927f31dd48ffcf99344560a0fba98e1af658555d520",
+      "validation": {
+        "steps": {
+          "build": 0,
+          "hybrid-one": 1,
+          "hybrid-two": 1,
+          "hybrid-nested": 1,
+          "queue-only": 0,
+          "serial-file": 0,
+          "nonstreamed": 0,
+          "upstream-subscription": 0,
+          "regression": 0,
+          "isolation": 0
+        },
+        "probes": {
+          "hybrid-one": {
+            "mode": "parallel",
+            "segments": 1,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [
+              "08P01: STREAM ABORT message without STREAM STOP",
+              "55000: logical replication parallel apply worker exited due to error"
+            ],
+            "partial_spool": true,
+            "bytes_before_abort": 20971560,
+            "bytes_after_abort": 0,
+            "pass": false
+          },
+          "hybrid-two": {
+            "mode": "parallel",
+            "segments": 2,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [
+              "08P01: STREAM ABORT message without STREAM STOP",
+              "55000: logical replication parallel apply worker exited due to error"
+            ],
+            "partial_spool": true,
+            "bytes_before_abort": 41943130,
+            "bytes_after_abort": 0,
+            "pass": false
+          },
+          "hybrid-nested": {
+            "mode": "parallel",
+            "segments": 1,
+            "nested": true,
+            "caught_up": true,
+            "expected": "1|10\n8|80\n9|90\n10|20",
+            "subscriber": "1|10\n8|80\n9|90\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [
+              "08P01: STREAM ABORT message without STREAM STOP",
+              "55000: logical replication parallel apply worker exited due to error"
+            ],
+            "partial_spool": true,
+            "bytes_before_abort": 20971560,
+            "bytes_after_abort": 0,
+            "pass": false
+          },
+          "queue-only": {
+            "mode": "parallel",
+            "segments": 0,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": false,
+            "bytes_before_abort": null,
+            "bytes_after_abort": null,
+            "pass": true
+          },
+          "serial-file": {
+            "mode": "on",
+            "segments": 1,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": false,
+            "bytes_before_abort": null,
+            "bytes_after_abort": null,
+            "pass": true
+          },
+          "nonstreamed": {
+            "mode": "off",
+            "segments": 1,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": false,
+            "bytes_before_abort": null,
+            "bytes_after_abort": null,
+            "pass": true
+          }
+        },
+        "subscription_tests_from_patch": [],
+        "seconds": 227.18
+      },
+      "tool_counts": {
+        "build_or_test": 5,
+        "read_or_search": 128,
+        "edit": 6
+      },
+      "compactions": 1,
+      "compaction_output_tokens": 381,
+      "compaction_native_seconds": 84.11,
+      "max_request_input": 104150,
+      "input_tokens": 7871605,
+      "output_tokens": 138862,
+      "top_output_requests": [
+        {
+          "request": 35,
+          "seconds": 342.12,
+          "input": 97006,
+          "output": 14618,
+          "stop": "tool_calls"
+        },
+        {
+          "request": 15,
+          "seconds": 287.25,
+          "input": 27770,
+          "output": 13686,
+          "stop": "tool_calls"
+        },
+        {
+          "request": 20,
+          "seconds": 271.02,
+          "input": 56489,
+          "output": 12866,
+          "stop": "tool_calls"
+        }
+      ],
+      "top_three_output_share": 0.2965,
+      "last_third_input_share": 0.4957,
+      "trace_missing_input": 104150,
+      "trace_missing_output": 381,
+      "model_requests": 144,
+      "shell_calls": 139,
+      "candidate_patch": "patches/slonik.patch",
+      "outcome": "C patch fails all three hybrid cases; no new test"
+    },
+    "qwen": {
+      "model": "Qwen3.8-27B-8bit",
+      "stop_reason": "end_turn",
+      "turns_started": 2,
+      "markov_seconds": 4359.86,
+      "cold_load_seconds": 4.9,
+      "validation_seconds": null,
+      "patch_bytes": 0,
+      "patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "validation": {},
+      "tool_counts": {
+        "build_or_test": 12,
+        "read_or_search": 74
+      },
+      "compactions": 5,
+      "compaction_output_tokens": 40960,
+      "compaction_native_seconds": 1560.12,
+      "max_request_input": 25780,
+      "input_tokens": 1025622,
+      "output_tokens": 112717,
+      "top_output_requests": [
+        {
+          "request": 14,
+          "seconds": 309.37,
+          "input": 13213,
+          "output": 8192,
+          "stop": "length"
+        },
+        {
+          "request": 29,
+          "seconds": 312.13,
+          "input": 15874,
+          "output": 8192,
+          "stop": "length"
+        },
+        {
+          "request": 43,
+          "seconds": 315.0,
+          "input": 18406,
+          "output": 8192,
+          "stop": "length"
+        }
+      ],
+      "top_three_output_share": 0.218,
+      "last_third_input_share": 0.3551,
+      "trace_missing_input": 0,
+      "trace_missing_output": 0,
+      "model_requests": 91,
+      "shell_calls": 86,
+      "candidate_patch": null,
+      "outcome": "No patch produced"
+    },
+    "glm": {
+      "model": "GLM-5.3-Flash-oQ4e-mtp",
+      "stop_reason": "end_turn",
+      "turns_started": 1,
+      "markov_seconds": 2512.04,
+      "cold_load_seconds": 33.89,
+      "validation_seconds": 371.0,
+      "patch_bytes": 11046,
+      "patch_sha256": "c2a9ea4bc7d6f87f5c13ede4363642aa0b1a85566e2b380128b24d9e792d0117",
+      "validation": {
+        "steps": {
+          "build": 0,
+          "hybrid-one": 0,
+          "hybrid-two": 0,
+          "hybrid-nested": 0,
+          "queue-only": 0,
+          "serial-file": 0,
+          "nonstreamed": 0,
+          "upstream-subscription": 0,
+          "regression": 0,
+          "isolation": 0,
+          "candidate-tests": 0,
+          "tests-only-on-defect": 2
+        },
+        "probes": {
+          "hybrid-one": {
+            "mode": "parallel",
+            "segments": 1,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": true,
+            "bytes_before_abort": 20971560,
+            "bytes_after_abort": 0,
+            "pass": true
+          },
+          "hybrid-two": {
+            "mode": "parallel",
+            "segments": 2,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": true,
+            "bytes_before_abort": 41943130,
+            "bytes_after_abort": 0,
+            "pass": true
+          },
+          "hybrid-nested": {
+            "mode": "parallel",
+            "segments": 1,
+            "nested": true,
+            "caught_up": true,
+            "expected": "1|10\n8|80\n9|90\n10|20",
+            "subscriber": "1|10\n8|80\n9|90\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": true,
+            "bytes_before_abort": 20971560,
+            "bytes_after_abort": 0,
+            "pass": true
+          },
+          "queue-only": {
+            "mode": "parallel",
+            "segments": 0,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": false,
+            "bytes_before_abort": null,
+            "bytes_after_abort": null,
+            "pass": true
+          },
+          "serial-file": {
+            "mode": "on",
+            "segments": 1,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": false,
+            "bytes_before_abort": null,
+            "bytes_after_abort": null,
+            "pass": true
+          },
+          "nonstreamed": {
+            "mode": "off",
+            "segments": 1,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": false,
+            "bytes_before_abort": null,
+            "bytes_after_abort": null,
+            "pass": true
+          }
+        },
+        "subscription_tests_from_patch": [
+          "t/036_stream_partial_serialize_reclaim.pl"
+        ],
+        "seconds": 371.0
+      },
+      "tool_counts": {
+        "build_or_test": 18,
+        "read_or_search": 63,
+        "edit": 11
+      },
+      "compactions": 0,
+      "compaction_output_tokens": 0,
+      "compaction_native_seconds": 0,
+      "max_request_input": 54425,
+      "input_tokens": 3090114,
+      "output_tokens": 97281,
+      "top_output_requests": [
+        {
+          "request": 14,
+          "seconds": 223.04,
+          "input": 44103,
+          "output": 14458,
+          "stop": "tool_calls"
+        },
+        {
+          "request": 20,
+          "seconds": 193.59,
+          "input": 28751,
+          "output": 13171,
+          "stop": "tool_calls"
+        },
+        {
+          "request": 11,
+          "seconds": 184.98,
+          "input": 21257,
+          "output": 12168,
+          "stop": "tool_calls"
+        }
+      ],
+      "top_three_output_share": 0.4091,
+      "last_third_input_share": 0.442,
+      "trace_missing_input": 0,
+      "trace_missing_output": 0,
+      "model_requests": 82,
+      "shell_calls": 92,
+      "candidate_patch": "patches/glm.patch",
+      "outcome": "C patch passes independent checks; original TAP catches extra row but has ineffective log-error assertion"
+    },
+    "qwen-131072": {
+      "markov_seconds": 2658.36,
+      "cold_load_seconds": 2.82,
+      "model_requests": 62,
+      "tool_calls": 64,
+      "tool_counts": {
+        "build_or_test": 8,
+        "read_or_search": 51,
+        "edit": 5
+      },
+      "input_tokens": 3310823,
+      "output_tokens": 65113,
+      "compactions": 0,
+      "max_request_input": 104127,
+      "patch_sha256": "620a765d96498bc2f48d0d65fa41d0a373a08ae085a2527dee4c2be911d32f13",
+      "validation": {
+        "steps": {
+          "build": 0,
+          "hybrid-one": 0,
+          "hybrid-two": 0,
+          "hybrid-nested": 0,
+          "queue-only": 0,
+          "serial-file": 0,
+          "nonstreamed": 0,
+          "upstream-subscription": 0,
+          "regression": 0,
+          "isolation": 0,
+          "candidate-tests": 2,
+          "tests-only-on-defect": 2
+        },
+        "probes": {
+          "hybrid-one": {
+            "mode": "parallel",
+            "segments": 1,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": true,
+            "bytes_before_abort": 20971560,
+            "bytes_after_abort": 0,
+            "pass": true
+          },
+          "hybrid-two": {
+            "mode": "parallel",
+            "segments": 2,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": true,
+            "bytes_before_abort": 41943130,
+            "bytes_after_abort": 0,
+            "pass": true
+          },
+          "hybrid-nested": {
+            "mode": "parallel",
+            "segments": 1,
+            "nested": true,
+            "caught_up": true,
+            "expected": "1|10\n8|80\n9|90\n10|20",
+            "subscriber": "1|10\n8|80\n9|90\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": true,
+            "bytes_before_abort": 20971560,
+            "bytes_after_abort": 0,
+            "pass": true
+          },
+          "queue-only": {
+            "mode": "parallel",
+            "segments": 0,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": false,
+            "bytes_before_abort": null,
+            "bytes_after_abort": null,
+            "pass": true
+          },
+          "serial-file": {
+            "mode": "on",
+            "segments": 1,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": false,
+            "bytes_before_abort": null,
+            "bytes_after_abort": null,
+            "pass": true
+          },
+          "nonstreamed": {
+            "mode": "off",
+            "segments": 1,
+            "nested": false,
+            "caught_up": true,
+            "expected": "1|10\n10|20",
+            "subscriber": "1|10\n10|20",
+            "subscriber_gate": "",
+            "apply_errors": [],
+            "partial_spool": false,
+            "bytes_before_abort": null,
+            "bytes_after_abort": null,
+            "pass": true
+          }
+        },
+        "subscription_tests_from_patch": [
+          "t/036_stream_subxact_abort_reclaim.pl"
+        ],
+        "seconds": 332.71
+      },
+      "candidate_test_error": "relation \"public.gate\" does not exist",
+      "model": "Qwen3.8-27B-8bit",
+      "shell_calls": 64,
+      "candidate_patch": "patches/qwen-131072.patch",
+      "outcome": "C patch passes; original TAP cannot set up the subscriber; author-repaired TAP has separate results",
+      "patch_provenance": "Model source changes preserved; generated test log excluded from exported patch.",
+      "author_test_repair": "human-repairs/results.json"
+    }
+  },
+  "controls": {
+    "upstream": "724edf9bde9d356724ad384a2e196edc3c9f80f7",
+    "prompt_sha256": "2e293bb92a256f0d92e248fa706e2e64ca25120be2ab68b7e8234c56a32c238f",
+    "seed_patch_sha256": "bdbe9e44795ae451d6138382153e9f538471119f93e73cedb35f8d3611ec0a25",
+    "controls": {
+      "seed-hybrid-one": {
+        "mode": "parallel",
+        "segments": 1,
+        "nested": false,
+        "caught_up": true,
+        "expected": "1|10\n10|20",
+        "subscriber": "1|10\n2|100\n10|20",
+        "subscriber_gate": "2",
+        "apply_errors": [],
+        "partial_spool": true,
+        "bytes_before_abort": 20971560,
+        "bytes_after_abort": 0,
+        "pass": false
+      },
+      "seed-hybrid-two": {
+        "mode": "parallel",
+        "segments": 2,
+        "nested": false,
+        "caught_up": true,
+        "expected": "1|10\n10|20",
+        "subscriber": "1|10\n10|20",
+        "subscriber_gate": "",
+        "apply_errors": [
+          "08P01: duplicate STREAM START message",
+          "55000: logical replication parallel apply worker exited due to error"
+        ],
+        "partial_spool": true,
+        "bytes_before_abort": 41943130,
+        "bytes_after_abort": 0,
+        "pass": false
+      },
+      "reference-hybrid-one": {
+        "mode": "parallel",
+        "segments": 1,
+        "nested": false,
+        "caught_up": true,
+        "expected": "1|10\n10|20",
+        "subscriber": "1|10\n10|20",
+        "subscriber_gate": "",
+        "apply_errors": [],
+        "partial_spool": true,
+        "bytes_before_abort": 20971560,
+        "bytes_after_abort": 0,
+        "pass": true
+      },
+      "reference-hybrid-two": {
+        "mode": "parallel",
+        "segments": 2,
+        "nested": false,
+        "caught_up": true,
+        "expected": "1|10\n10|20",
+        "subscriber": "1|10\n10|20",
+        "subscriber_gate": "",
+        "apply_errors": [],
+        "partial_spool": true,
+        "bytes_before_abort": 41943130,
+        "bytes_after_abort": 0,
+        "pass": true
+      },
+      "reference-hybrid-nested": {
+        "mode": "parallel",
+        "segments": 1,
+        "nested": true,
+        "caught_up": true,
+        "expected": "1|10\n8|80\n9|90\n10|20",
+        "subscriber": "1|10\n8|80\n9|90\n10|20",
+        "subscriber_gate": "",
+        "apply_errors": [],
+        "partial_spool": true,
+        "bytes_before_abort": 20971560,
+        "bytes_after_abort": 0,
+        "pass": true
+      },
+      "reference-queue-only": {
+        "mode": "parallel",
+        "segments": 0,
+        "nested": false,
+        "caught_up": true,
+        "expected": "1|10\n10|20",
+        "subscriber": "1|10\n10|20",
+        "subscriber_gate": "",
+        "apply_errors": [],
+        "partial_spool": false,
+        "bytes_before_abort": null,
+        "bytes_after_abort": null,
+        "pass": true
+      },
+      "reference-serial-file": {
+        "mode": "on",
+        "segments": 1,
+        "nested": false,
+        "caught_up": true,
+        "expected": "1|10\n10|20",
+        "subscriber": "1|10\n10|20",
+        "subscriber_gate": "",
+        "apply_errors": [],
+        "partial_spool": false,
+        "bytes_before_abort": null,
+        "bytes_after_abort": null,
+        "pass": true
+      },
+      "reference-nonstreamed": {
+        "mode": "off",
+        "segments": 1,
+        "nested": false,
+        "caught_up": true,
+        "expected": "1|10\n10|20",
+        "subscriber": "1|10\n10|20",
+        "subscriber_gate": "",
+        "apply_errors": [],
+        "partial_spool": false,
+        "bytes_before_abort": null,
+        "bytes_after_abort": null,
+        "pass": true
+      },
+      "upstream-hybrid-one": {
+        "mode": "parallel",
+        "segments": 1,
+        "nested": false,
+        "caught_up": true,
+        "expected": "1|10\n10|20",
+        "subscriber": "1|10\n10|20",
+        "subscriber_gate": "",
+        "apply_errors": [],
+        "partial_spool": true,
+        "bytes_before_abort": 20971560,
+        "bytes_after_abort": null,
+        "pass": true
+      }
+    },
+    "independent_reference_judge": {
+      "steps": {
+        "build": 0,
+        "hybrid-one": 0,
+        "hybrid-two": 0,
+        "hybrid-nested": 0,
+        "queue-only": 0,
+        "serial-file": 0,
+        "nonstreamed": 0,
+        "upstream-subscription": 0,
+        "regression": 0,
+        "isolation": 0
+      },
+      "upstream_subscription_assertions": 58,
+      "core_regression_tests": 231,
+      "isolation_tests": 122
+    }
+  }
+}

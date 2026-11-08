@@ -1,0 +1,1 @@
+Use only the provided workspace shell. Work in the supplied source tree, follow nearby PostgreSQL C style, and make the narrowest fix. Do not delegate or commit.

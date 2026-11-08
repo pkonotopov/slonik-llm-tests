@@ -1,0 +1,14 @@
+You are working on a PostgreSQL 18 engine bug in a self-contained source checkout. A SELECT with an OR predicate on a LIST-partitioned table can silently miss a matching row from its DEFAULT partition when partition pruning is enabled. With partition pruning disabled, both rows are returned.
+
+Reproducer:
+CREATE TABLE p(k int, label text) PARTITION BY LIST(k);
+CREATE TABLE p_a PARTITION OF p FOR VALUES IN (1,2);
+CREATE TABLE p_b PARTITION OF p FOR VALUES IN (10,20);
+CREATE TABLE p_null PARTITION OF p FOR VALUES IN (NULL);
+CREATE TABLE p_default PARTITION OF p DEFAULT;
+INSERT INTO p VALUES (1,'a1'),(2,'a2'),(10,'b10'),(20,'b20'),(99,'keep'),(99,'drop'),(NULL,'nil'),(-7,'keep');
+SELECT k,label FROM p WHERE k = 20 OR (k = 99 AND label = 'keep') ORDER BY k,label;
+
+Expected ordered rows: (20,'b20'), (99,'keep'). The plan should scan p_b and p_default and still prune the unrelated partitions.
+
+Investigate the PostgreSQL sources, fix the root cause in C, and add a focused core regression test. Preserve valid pruning for other conditions. Use the supplied shell tool, which starts in /work, with no internet access. The source tree has a single baseline commit. /bench/repro builds in /build and runs the visible reproducer. To run core regressions after configuring, use make -C /build -j6 check. Do not commit. Finish with a short English summary of what you changed and what you actually tested.

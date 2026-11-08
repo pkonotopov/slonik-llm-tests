@@ -1,0 +1,3803 @@
+{
+  "schema_version": 1,
+  "record_kind": "archived experiment results, not a new model run",
+  "source_revision": "63d9e26c27b9965a78f0d59512a80d84935a7c4b",
+  "postgresql_version": "18.6",
+  "timing_definition": "Sum of agent sessions including shell commands; independent validation and model loading excluded. Failed setup before model inference excluded.",
+  "token_accounting": "The original SDK usage fields describe only the final model response; omitted here because they are not complete-session totals.",
+  "controls": {
+    "clean_upstream": {
+      "version": "18.6",
+      "checks": [
+        {
+          "name": "visible",
+          "expected_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "actual_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "expected_relations": [
+            "p_b",
+            "p_default"
+          ],
+          "actual_relations": [
+            "p_b",
+            "p_default"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "default_first",
+          "expected_rows": [
+            [
+              -7,
+              "keep"
+            ],
+            [
+              2,
+              "a2"
+            ]
+          ],
+          "actual_rows": [
+            [
+              -7,
+              "keep"
+            ],
+            [
+              2,
+              "a2"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              -7,
+              "keep"
+            ],
+            [
+              2,
+              "a2"
+            ]
+          ],
+          "expected_relations": [
+            "p_a",
+            "p_default"
+          ],
+          "actual_relations": [
+            "p_a",
+            "p_default"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "default_only",
+          "expected_rows": [
+            [
+              -7,
+              "keep"
+            ],
+            [
+              99,
+              "drop"
+            ]
+          ],
+          "actual_rows": [
+            [
+              -7,
+              "keep"
+            ],
+            [
+              99,
+              "drop"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              -7,
+              "keep"
+            ],
+            [
+              99,
+              "drop"
+            ]
+          ],
+          "expected_relations": [
+            "p_default"
+          ],
+          "actual_relations": [
+            "p_default"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "null_and_regular",
+          "expected_rows": [
+            [
+              10,
+              "b10"
+            ],
+            [
+              null,
+              "nil"
+            ]
+          ],
+          "actual_rows": [
+            [
+              10,
+              "b10"
+            ],
+            [
+              null,
+              "nil"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              10,
+              "b10"
+            ],
+            [
+              null,
+              "nil"
+            ]
+          ],
+          "expected_relations": [
+            "p_b",
+            "p_null"
+          ],
+          "actual_relations": [
+            "p_b",
+            "p_null"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "null_and_default",
+          "expected_rows": [
+            [
+              99,
+              "keep"
+            ],
+            [
+              null,
+              "nil"
+            ]
+          ],
+          "actual_rows": [
+            [
+              99,
+              "keep"
+            ],
+            [
+              null,
+              "nil"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              99,
+              "keep"
+            ],
+            [
+              null,
+              "nil"
+            ]
+          ],
+          "expected_relations": [
+            "p_default",
+            "p_null"
+          ],
+          "actual_relations": [
+            "p_default",
+            "p_null"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "two_regular",
+          "expected_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "actual_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "expected_relations": [
+            "p_a",
+            "p_b"
+          ],
+          "actual_relations": [
+            "p_a",
+            "p_b"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "single_regular",
+          "expected_rows": [
+            [
+              1,
+              "a1"
+            ]
+          ],
+          "actual_rows": [
+            [
+              1,
+              "a1"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              1,
+              "a1"
+            ]
+          ],
+          "expected_relations": [
+            "p_a"
+          ],
+          "actual_relations": [
+            "p_a"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "nested_or",
+          "expected_rows": [
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "actual_rows": [
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "expected_relations": [
+            "p_b",
+            "p_default"
+          ],
+          "actual_relations": [
+            "p_b",
+            "p_default"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "range_default",
+          "expected_rows": [
+            [
+              32,
+              -7
+            ]
+          ],
+          "actual_rows": [
+            [
+              32,
+              -7
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              32,
+              -7
+            ]
+          ],
+          "expected_relations": [
+            "r_default"
+          ],
+          "actual_relations": [
+            "r_default"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "range_explicit",
+          "expected_rows": [
+            [
+              19,
+              5
+            ]
+          ],
+          "actual_rows": [
+            [
+              19,
+              5
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              19,
+              5
+            ]
+          ],
+          "expected_relations": [
+            "r_explicit"
+          ],
+          "actual_relations": [
+            "r_explicit"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "range_both",
+          "expected_rows": [
+            [
+              19,
+              5
+            ],
+            [
+              20,
+              6
+            ]
+          ],
+          "actual_rows": [
+            [
+              19,
+              5
+            ],
+            [
+              20,
+              6
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              19,
+              5
+            ],
+            [
+              20,
+              6
+            ]
+          ],
+          "expected_relations": [
+            "r_default",
+            "r_explicit"
+          ],
+          "actual_relations": [
+            "r_default",
+            "r_explicit"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "prepared_default_force_custom_plan",
+          "expected_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "actual_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "expected_relations": [
+            "p_b",
+            "p_default"
+          ],
+          "actual_relations": [
+            "p_b",
+            "p_default"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "prepared_two_regular_force_custom_plan",
+          "expected_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "actual_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "expected_relations": [
+            "p_a",
+            "p_b"
+          ],
+          "actual_relations": [
+            "p_a",
+            "p_b"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "prepared_default_force_generic_plan",
+          "expected_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "actual_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "expected_relations": [
+            "p_b",
+            "p_default"
+          ],
+          "actual_relations": [
+            "p_b",
+            "p_default"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "prepared_two_regular_force_generic_plan",
+          "expected_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "actual_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "expected_relations": [
+            "p_a",
+            "p_b"
+          ],
+          "actual_relations": [
+            "p_a",
+            "p_b"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        }
+      ],
+      "repro_pass": true,
+      "all_rows_match": true,
+      "pruning_pass": true
+    },
+    "synthetic_defect": {
+      "version": "18.6",
+      "checks": [
+        {
+          "name": "visible",
+          "expected_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "actual_rows": [
+            [
+              20,
+              "b20"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "expected_relations": [
+            "p_b",
+            "p_default"
+          ],
+          "actual_relations": [
+            "p_b"
+          ],
+          "rows_ok": false,
+          "pruning_ok": false
+        },
+        {
+          "name": "default_first",
+          "expected_rows": [
+            [
+              -7,
+              "keep"
+            ],
+            [
+              2,
+              "a2"
+            ]
+          ],
+          "actual_rows": [
+            [
+              2,
+              "a2"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              -7,
+              "keep"
+            ],
+            [
+              2,
+              "a2"
+            ]
+          ],
+          "expected_relations": [
+            "p_a",
+            "p_default"
+          ],
+          "actual_relations": [
+            "p_a"
+          ],
+          "rows_ok": false,
+          "pruning_ok": false
+        },
+        {
+          "name": "default_only",
+          "expected_rows": [
+            [
+              -7,
+              "keep"
+            ],
+            [
+              99,
+              "drop"
+            ]
+          ],
+          "actual_rows": [],
+          "unpruned_rows": [
+            [
+              -7,
+              "keep"
+            ],
+            [
+              99,
+              "drop"
+            ]
+          ],
+          "expected_relations": [
+            "p_default"
+          ],
+          "actual_relations": [],
+          "rows_ok": false,
+          "pruning_ok": false
+        },
+        {
+          "name": "null_and_regular",
+          "expected_rows": [
+            [
+              10,
+              "b10"
+            ],
+            [
+              null,
+              "nil"
+            ]
+          ],
+          "actual_rows": [
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              10,
+              "b10"
+            ],
+            [
+              null,
+              "nil"
+            ]
+          ],
+          "expected_relations": [
+            "p_b",
+            "p_null"
+          ],
+          "actual_relations": [
+            "p_b"
+          ],
+          "rows_ok": false,
+          "pruning_ok": false
+        },
+        {
+          "name": "null_and_default",
+          "expected_rows": [
+            [
+              99,
+              "keep"
+            ],
+            [
+              null,
+              "nil"
+            ]
+          ],
+          "actual_rows": [],
+          "unpruned_rows": [
+            [
+              99,
+              "keep"
+            ],
+            [
+              null,
+              "nil"
+            ]
+          ],
+          "expected_relations": [
+            "p_default",
+            "p_null"
+          ],
+          "actual_relations": [],
+          "rows_ok": false,
+          "pruning_ok": false
+        },
+        {
+          "name": "two_regular",
+          "expected_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "actual_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "expected_relations": [
+            "p_a",
+            "p_b"
+          ],
+          "actual_relations": [
+            "p_a",
+            "p_b"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "single_regular",
+          "expected_rows": [
+            [
+              1,
+              "a1"
+            ]
+          ],
+          "actual_rows": [
+            [
+              1,
+              "a1"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              1,
+              "a1"
+            ]
+          ],
+          "expected_relations": [
+            "p_a"
+          ],
+          "actual_relations": [
+            "p_a"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "nested_or",
+          "expected_rows": [
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "actual_rows": [],
+          "unpruned_rows": [
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "expected_relations": [
+            "p_b",
+            "p_default"
+          ],
+          "actual_relations": [
+            "p_b"
+          ],
+          "rows_ok": false,
+          "pruning_ok": false
+        },
+        {
+          "name": "range_default",
+          "expected_rows": [
+            [
+              32,
+              -7
+            ]
+          ],
+          "actual_rows": [
+            [
+              32,
+              -7
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              32,
+              -7
+            ]
+          ],
+          "expected_relations": [
+            "r_default"
+          ],
+          "actual_relations": [
+            "r_default"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "range_explicit",
+          "expected_rows": [
+            [
+              19,
+              5
+            ]
+          ],
+          "actual_rows": [
+            [
+              19,
+              5
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              19,
+              5
+            ]
+          ],
+          "expected_relations": [
+            "r_explicit"
+          ],
+          "actual_relations": [
+            "r_explicit"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "range_both",
+          "expected_rows": [
+            [
+              19,
+              5
+            ],
+            [
+              20,
+              6
+            ]
+          ],
+          "actual_rows": [
+            [
+              19,
+              5
+            ],
+            [
+              20,
+              6
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              19,
+              5
+            ],
+            [
+              20,
+              6
+            ]
+          ],
+          "expected_relations": [
+            "r_default",
+            "r_explicit"
+          ],
+          "actual_relations": [
+            "r_default",
+            "r_explicit"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "prepared_default_force_custom_plan",
+          "expected_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "actual_rows": [
+            [
+              20,
+              "b20"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "expected_relations": [
+            "p_b",
+            "p_default"
+          ],
+          "actual_relations": [
+            "p_b"
+          ],
+          "rows_ok": false,
+          "pruning_ok": false
+        },
+        {
+          "name": "prepared_two_regular_force_custom_plan",
+          "expected_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "actual_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "expected_relations": [
+            "p_a",
+            "p_b"
+          ],
+          "actual_relations": [
+            "p_a",
+            "p_b"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        },
+        {
+          "name": "prepared_default_force_generic_plan",
+          "expected_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "actual_rows": [
+            [
+              20,
+              "b20"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              20,
+              "b20"
+            ],
+            [
+              99,
+              "keep"
+            ]
+          ],
+          "expected_relations": [
+            "p_b",
+            "p_default"
+          ],
+          "actual_relations": [
+            "p_b"
+          ],
+          "rows_ok": false,
+          "pruning_ok": false
+        },
+        {
+          "name": "prepared_two_regular_force_generic_plan",
+          "expected_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "actual_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "unpruned_rows": [
+            [
+              1,
+              "a1"
+            ],
+            [
+              10,
+              "b10"
+            ]
+          ],
+          "expected_relations": [
+            "p_a",
+            "p_b"
+          ],
+          "actual_relations": [
+            "p_a",
+            "p_b"
+          ],
+          "rows_ok": true,
+          "pruning_ok": true
+        }
+      ],
+      "repro_pass": false,
+      "all_rows_match": false,
+      "pruning_pass": false
+    },
+    "clean_core_regressions_exit": "0",
+    "clean_core_regressions_summary": "# All 231 tests passed."
+  },
+  "models": [
+    {
+      "model": "Slonik-27B-oQ8-mtp",
+      "patch": "../patches/oq8.patch",
+      "patch_sha256": "4685f510fac7905a1acfc7d24fb983ae4a61bb2067ca0ab0e3919a309980e199",
+      "agent_seconds": 702.38,
+      "attempts": [
+        {
+          "phase": "initial",
+          "seconds": 414.65,
+          "patch_bytes": 818,
+          "shell_calls": 31,
+          "prompt_file": "PROMPT.txt"
+        },
+        {
+          "phase": "followup",
+          "seconds": 287.73,
+          "patch_bytes": 3848,
+          "shell_calls": 18,
+          "prompt_file": "FOLLOWUP.txt"
+        }
+      ],
+      "verification": {
+        "independent_checkout": true,
+        "build_pass": true,
+        "repro_pass": true,
+        "all_rows_match": true,
+        "pruning_pass": true,
+        "core_regressions_pass": true,
+        "changed_files": [
+          {
+            "path": "src/backend/partitioning/partprune.c",
+            "additions": 5,
+            "deletions": 3
+          },
+          {
+            "path": "src/test/regress/expected/partition_prune.out",
+            "additions": 33,
+            "deletions": 0
+          },
+          {
+            "path": "src/test/regress/sql/partition_prune.sql",
+            "additions": 21,
+            "deletions": 0
+          }
+        ],
+        "build_exit": 0,
+        "install_exit": 0,
+        "checks_exit": 0,
+        "version": "18.6",
+        "checks": [
+          {
+            "name": "visible",
+            "expected_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "default_first",
+            "expected_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                2,
+                "a2"
+              ]
+            ],
+            "actual_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                2,
+                "a2"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                2,
+                "a2"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "default_only",
+            "expected_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                99,
+                "drop"
+              ]
+            ],
+            "actual_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                99,
+                "drop"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                99,
+                "drop"
+              ]
+            ],
+            "expected_relations": [
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "null_and_regular",
+            "expected_rows": [
+              [
+                10,
+                "b10"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "actual_rows": [
+              [
+                10,
+                "b10"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                10,
+                "b10"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_null"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_null"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "null_and_default",
+            "expected_rows": [
+              [
+                99,
+                "keep"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "actual_rows": [
+              [
+                99,
+                "keep"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                99,
+                "keep"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "expected_relations": [
+              "p_default",
+              "p_null"
+            ],
+            "actual_relations": [
+              "p_default",
+              "p_null"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "two_regular",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "single_regular",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ]
+            ],
+            "expected_relations": [
+              "p_a"
+            ],
+            "actual_relations": [
+              "p_a"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "nested_or",
+            "expected_rows": [
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "range_default",
+            "expected_rows": [
+              [
+                32,
+                -7
+              ]
+            ],
+            "actual_rows": [
+              [
+                32,
+                -7
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                32,
+                -7
+              ]
+            ],
+            "expected_relations": [
+              "r_default"
+            ],
+            "actual_relations": [
+              "r_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "range_explicit",
+            "expected_rows": [
+              [
+                19,
+                5
+              ]
+            ],
+            "actual_rows": [
+              [
+                19,
+                5
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                19,
+                5
+              ]
+            ],
+            "expected_relations": [
+              "r_explicit"
+            ],
+            "actual_relations": [
+              "r_explicit"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "range_both",
+            "expected_rows": [
+              [
+                19,
+                5
+              ],
+              [
+                20,
+                6
+              ]
+            ],
+            "actual_rows": [
+              [
+                19,
+                5
+              ],
+              [
+                20,
+                6
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                19,
+                5
+              ],
+              [
+                20,
+                6
+              ]
+            ],
+            "expected_relations": [
+              "r_default",
+              "r_explicit"
+            ],
+            "actual_relations": [
+              "r_default",
+              "r_explicit"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_default_force_custom_plan",
+            "expected_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_two_regular_force_custom_plan",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_default_force_generic_plan",
+            "expected_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_two_regular_force_generic_plan",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          }
+        ],
+        "core_regressions_exit": 0,
+        "core_regressions_summary": "# All 231 tests passed.",
+        "core_regressions_test_count": 231,
+        "partition_prune_regression_pass": true
+      },
+      "test_sensitivity": {
+        "model_added_test_detected_mutant": true,
+        "regressions_exit": 2,
+        "differing_added_expectation_lines": [
+          "QUERY PLAN",
+          "---------------------------------------------------------------------------",
+          "->  Append",
+          "->  Seq Scan on or_prune_b or_prune_1",
+          "Filter: ((k = 20) OR ((k = 99) AND (label = 'keep'::text)))",
+          "->  Seq Scan on or_prune_default or_prune_2",
+          "Filter: ((k = 20) OR ((k = 99) AND (label = 'keep'::text)))",
+          "(7 rows)",
+          "99 | keep",
+          "(2 rows)"
+        ]
+      }
+    },
+    {
+      "model": "Slonik-27B-oQ6e-mtp",
+      "patch": "../patches/oq6e.patch",
+      "patch_sha256": "e67d46d83a0ef84fbd1072211fc014f5e1ab19dfe4f8e34dde4afbbe64cb822e",
+      "agent_seconds": 488.02,
+      "attempts": [
+        {
+          "phase": "initial",
+          "seconds": 488.02,
+          "patch_bytes": 4254,
+          "shell_calls": 50,
+          "prompt_file": "PROMPT.txt"
+        }
+      ],
+      "verification": {
+        "independent_checkout": true,
+        "build_pass": true,
+        "repro_pass": true,
+        "all_rows_match": true,
+        "pruning_pass": true,
+        "core_regressions_pass": true,
+        "changed_files": [
+          {
+            "path": "src/backend/partitioning/partprune.c",
+            "additions": 8,
+            "deletions": 2
+          },
+          {
+            "path": "src/test/regress/expected/partition_prune.out",
+            "additions": 26,
+            "deletions": 0
+          },
+          {
+            "path": "src/test/regress/sql/partition_prune.sql",
+            "additions": 10,
+            "deletions": 0
+          }
+        ],
+        "build_exit": 0,
+        "install_exit": 0,
+        "checks_exit": 0,
+        "version": "18.6",
+        "checks": [
+          {
+            "name": "visible",
+            "expected_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "default_first",
+            "expected_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                2,
+                "a2"
+              ]
+            ],
+            "actual_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                2,
+                "a2"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                2,
+                "a2"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "default_only",
+            "expected_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                99,
+                "drop"
+              ]
+            ],
+            "actual_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                99,
+                "drop"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                99,
+                "drop"
+              ]
+            ],
+            "expected_relations": [
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "null_and_regular",
+            "expected_rows": [
+              [
+                10,
+                "b10"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "actual_rows": [
+              [
+                10,
+                "b10"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                10,
+                "b10"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_null"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_null"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "null_and_default",
+            "expected_rows": [
+              [
+                99,
+                "keep"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "actual_rows": [
+              [
+                99,
+                "keep"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                99,
+                "keep"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "expected_relations": [
+              "p_default",
+              "p_null"
+            ],
+            "actual_relations": [
+              "p_default",
+              "p_null"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "two_regular",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "single_regular",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ]
+            ],
+            "expected_relations": [
+              "p_a"
+            ],
+            "actual_relations": [
+              "p_a"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "nested_or",
+            "expected_rows": [
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "range_default",
+            "expected_rows": [
+              [
+                32,
+                -7
+              ]
+            ],
+            "actual_rows": [
+              [
+                32,
+                -7
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                32,
+                -7
+              ]
+            ],
+            "expected_relations": [
+              "r_default"
+            ],
+            "actual_relations": [
+              "r_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "range_explicit",
+            "expected_rows": [
+              [
+                19,
+                5
+              ]
+            ],
+            "actual_rows": [
+              [
+                19,
+                5
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                19,
+                5
+              ]
+            ],
+            "expected_relations": [
+              "r_explicit"
+            ],
+            "actual_relations": [
+              "r_explicit"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "range_both",
+            "expected_rows": [
+              [
+                19,
+                5
+              ],
+              [
+                20,
+                6
+              ]
+            ],
+            "actual_rows": [
+              [
+                19,
+                5
+              ],
+              [
+                20,
+                6
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                19,
+                5
+              ],
+              [
+                20,
+                6
+              ]
+            ],
+            "expected_relations": [
+              "r_default",
+              "r_explicit"
+            ],
+            "actual_relations": [
+              "r_default",
+              "r_explicit"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_default_force_custom_plan",
+            "expected_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_two_regular_force_custom_plan",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_default_force_generic_plan",
+            "expected_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_two_regular_force_generic_plan",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          }
+        ],
+        "core_regressions_exit": 0,
+        "core_regressions_summary": "# All 231 tests passed.",
+        "core_regressions_test_count": 231,
+        "partition_prune_regression_pass": true
+      },
+      "test_sensitivity": {
+        "model_added_test_detected_mutant": true,
+        "regressions_exit": 2,
+        "differing_added_expectation_lines": [
+          "QUERY PLAN",
+          "----------------------------------------------------------",
+          "Append",
+          "->  Seq Scan on lp_g lp_1",
+          "Filter: ((a = 'g'::bpchar) OR (a = 'z'::bpchar))",
+          "->  Seq Scan on lp_default lp_2",
+          "Filter: ((a = 'g'::bpchar) OR (a = 'z'::bpchar))",
+          "(5 rows)",
+          "QUERY PLAN",
+          "--------------------------------------------------------------------------------",
+          "Append",
+          "->  Seq Scan on lp_g lp_1",
+          "Filter: ((a = 'g'::bpchar) OR ((a = 'z'::bpchar) AND (a IS NOT NULL)))",
+          "->  Seq Scan on lp_default lp_2",
+          "Filter: ((a = 'g'::bpchar) OR ((a = 'z'::bpchar) AND (a IS NOT NULL)))",
+          "(5 rows)"
+        ]
+      }
+    },
+    {
+      "model": "Slonik-27B-oQ4e-mtp",
+      "patch": "../patches/oq4e.patch",
+      "patch_sha256": "bdbb8af76b431f45c15ee16cb7b17108bc8c3020cfe3da03dd0a2a462f9ab8dd",
+      "agent_seconds": 1143.85,
+      "attempts": [
+        {
+          "phase": "initial",
+          "seconds": 678.27,
+          "patch_bytes": 0,
+          "shell_calls": 23,
+          "prompt_file": "PROMPT.txt"
+        },
+        {
+          "phase": "followup",
+          "seconds": 465.58,
+          "patch_bytes": 4741,
+          "shell_calls": 36,
+          "prompt_file": "RETRY-oQ4e.txt"
+        }
+      ],
+      "verification": {
+        "independent_checkout": true,
+        "build_pass": true,
+        "repro_pass": true,
+        "all_rows_match": true,
+        "pruning_pass": true,
+        "core_regressions_pass": true,
+        "changed_files": [
+          {
+            "path": "src/backend/partitioning/partprune.c",
+            "additions": 3,
+            "deletions": 2
+          },
+          {
+            "path": "src/test/regress/expected/partition_prune.out",
+            "additions": 45,
+            "deletions": 0
+          },
+          {
+            "path": "src/test/regress/sql/partition_prune.sql",
+            "additions": 23,
+            "deletions": 0
+          }
+        ],
+        "build_exit": 0,
+        "install_exit": 0,
+        "checks_exit": 0,
+        "version": "18.6",
+        "checks": [
+          {
+            "name": "visible",
+            "expected_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "default_first",
+            "expected_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                2,
+                "a2"
+              ]
+            ],
+            "actual_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                2,
+                "a2"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                2,
+                "a2"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "default_only",
+            "expected_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                99,
+                "drop"
+              ]
+            ],
+            "actual_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                99,
+                "drop"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                99,
+                "drop"
+              ]
+            ],
+            "expected_relations": [
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "null_and_regular",
+            "expected_rows": [
+              [
+                10,
+                "b10"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "actual_rows": [
+              [
+                10,
+                "b10"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                10,
+                "b10"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_null"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_null"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "null_and_default",
+            "expected_rows": [
+              [
+                99,
+                "keep"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "actual_rows": [
+              [
+                99,
+                "keep"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                99,
+                "keep"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "expected_relations": [
+              "p_default",
+              "p_null"
+            ],
+            "actual_relations": [
+              "p_default",
+              "p_null"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "two_regular",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "single_regular",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ]
+            ],
+            "expected_relations": [
+              "p_a"
+            ],
+            "actual_relations": [
+              "p_a"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "nested_or",
+            "expected_rows": [
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "range_default",
+            "expected_rows": [
+              [
+                32,
+                -7
+              ]
+            ],
+            "actual_rows": [
+              [
+                32,
+                -7
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                32,
+                -7
+              ]
+            ],
+            "expected_relations": [
+              "r_default"
+            ],
+            "actual_relations": [
+              "r_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "range_explicit",
+            "expected_rows": [
+              [
+                19,
+                5
+              ]
+            ],
+            "actual_rows": [
+              [
+                19,
+                5
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                19,
+                5
+              ]
+            ],
+            "expected_relations": [
+              "r_explicit"
+            ],
+            "actual_relations": [
+              "r_explicit"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "range_both",
+            "expected_rows": [
+              [
+                19,
+                5
+              ],
+              [
+                20,
+                6
+              ]
+            ],
+            "actual_rows": [
+              [
+                19,
+                5
+              ],
+              [
+                20,
+                6
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                19,
+                5
+              ],
+              [
+                20,
+                6
+              ]
+            ],
+            "expected_relations": [
+              "r_default",
+              "r_explicit"
+            ],
+            "actual_relations": [
+              "r_default",
+              "r_explicit"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_default_force_custom_plan",
+            "expected_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_two_regular_force_custom_plan",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_default_force_generic_plan",
+            "expected_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_two_regular_force_generic_plan",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          }
+        ],
+        "core_regressions_exit": 0,
+        "core_regressions_summary": "# All 231 tests passed.",
+        "core_regressions_test_count": 231,
+        "partition_prune_regression_pass": true
+      },
+      "test_sensitivity": {
+        "model_added_test_detected_mutant": true,
+        "regressions_exit": 2,
+        "differing_added_expectation_lines": [
+          "QUERY PLAN",
+          "---------------------------------------------------------------------------",
+          "->  Append",
+          "->  Seq Scan on or_def_part_b or_def_part_1",
+          "Filter: ((k = 20) OR ((k = 99) AND (label = 'keep'::text)))",
+          "->  Seq Scan on or_def_part_default or_def_part_2",
+          "Filter: ((k = 20) OR ((k = 99) AND (label = 'keep'::text)))",
+          "(7 rows)",
+          "99 | keep",
+          "(2 rows)"
+        ]
+      }
+    },
+    {
+      "model": "GLM-5.3-Flash-oQ4e-mtp",
+      "patch": "../patches/glm.patch",
+      "patch_sha256": "e00332c1ecd5fe703be92725e4bebb4e33a56c79d77dc952fe62922cb93bce68",
+      "agent_seconds": 193.92,
+      "attempts": [
+        {
+          "phase": "initial",
+          "seconds": 193.92,
+          "patch_bytes": 5208,
+          "shell_calls": 22,
+          "prompt_file": "PROMPT.txt"
+        }
+      ],
+      "partprune_c_matches_clean_upstream": true,
+      "verification": {
+        "independent_checkout": true,
+        "build_pass": true,
+        "repro_pass": true,
+        "all_rows_match": true,
+        "pruning_pass": true,
+        "core_regressions_pass": true,
+        "changed_files": [
+          {
+            "path": "src/backend/partitioning/partprune.c",
+            "additions": 0,
+            "deletions": 4
+          },
+          {
+            "path": "src/test/regress/expected/partition_prune.out",
+            "additions": 58,
+            "deletions": 0
+          },
+          {
+            "path": "src/test/regress/sql/partition_prune.sql",
+            "additions": 28,
+            "deletions": 0
+          }
+        ],
+        "build_exit": 0,
+        "install_exit": 0,
+        "checks_exit": 0,
+        "version": "18.6",
+        "checks": [
+          {
+            "name": "visible",
+            "expected_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "default_first",
+            "expected_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                2,
+                "a2"
+              ]
+            ],
+            "actual_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                2,
+                "a2"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                2,
+                "a2"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "default_only",
+            "expected_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                99,
+                "drop"
+              ]
+            ],
+            "actual_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                99,
+                "drop"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                -7,
+                "keep"
+              ],
+              [
+                99,
+                "drop"
+              ]
+            ],
+            "expected_relations": [
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "null_and_regular",
+            "expected_rows": [
+              [
+                10,
+                "b10"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "actual_rows": [
+              [
+                10,
+                "b10"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                10,
+                "b10"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_null"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_null"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "null_and_default",
+            "expected_rows": [
+              [
+                99,
+                "keep"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "actual_rows": [
+              [
+                99,
+                "keep"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                99,
+                "keep"
+              ],
+              [
+                null,
+                "nil"
+              ]
+            ],
+            "expected_relations": [
+              "p_default",
+              "p_null"
+            ],
+            "actual_relations": [
+              "p_default",
+              "p_null"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "two_regular",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "single_regular",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ]
+            ],
+            "expected_relations": [
+              "p_a"
+            ],
+            "actual_relations": [
+              "p_a"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "nested_or",
+            "expected_rows": [
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "range_default",
+            "expected_rows": [
+              [
+                32,
+                -7
+              ]
+            ],
+            "actual_rows": [
+              [
+                32,
+                -7
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                32,
+                -7
+              ]
+            ],
+            "expected_relations": [
+              "r_default"
+            ],
+            "actual_relations": [
+              "r_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "range_explicit",
+            "expected_rows": [
+              [
+                19,
+                5
+              ]
+            ],
+            "actual_rows": [
+              [
+                19,
+                5
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                19,
+                5
+              ]
+            ],
+            "expected_relations": [
+              "r_explicit"
+            ],
+            "actual_relations": [
+              "r_explicit"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "range_both",
+            "expected_rows": [
+              [
+                19,
+                5
+              ],
+              [
+                20,
+                6
+              ]
+            ],
+            "actual_rows": [
+              [
+                19,
+                5
+              ],
+              [
+                20,
+                6
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                19,
+                5
+              ],
+              [
+                20,
+                6
+              ]
+            ],
+            "expected_relations": [
+              "r_default",
+              "r_explicit"
+            ],
+            "actual_relations": [
+              "r_default",
+              "r_explicit"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_default_force_custom_plan",
+            "expected_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_two_regular_force_custom_plan",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_default_force_generic_plan",
+            "expected_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "actual_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                20,
+                "b20"
+              ],
+              [
+                99,
+                "keep"
+              ]
+            ],
+            "expected_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "actual_relations": [
+              "p_b",
+              "p_default"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          },
+          {
+            "name": "prepared_two_regular_force_generic_plan",
+            "expected_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "actual_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "unpruned_rows": [
+              [
+                1,
+                "a1"
+              ],
+              [
+                10,
+                "b10"
+              ]
+            ],
+            "expected_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "actual_relations": [
+              "p_a",
+              "p_b"
+            ],
+            "rows_ok": true,
+            "pruning_ok": true
+          }
+        ],
+        "core_regressions_exit": 0,
+        "core_regressions_summary": "# All 231 tests passed.",
+        "core_regressions_test_count": 231,
+        "partition_prune_regression_pass": true
+      },
+      "test_sensitivity": {
+        "model_added_test_detected_mutant": true,
+        "regressions_exit": 2,
+        "differing_added_expectation_lines": [
+          "QUERY PLAN",
+          "---------------------------------------------------------------------------",
+          "->  Append",
+          "->  Seq Scan on list_default_or_b list_default_or_1",
+          "Filter: ((k = 20) OR ((k = 99) AND (label = 'keep'::text)))",
+          "->  Seq Scan on list_default_or_def list_default_or_2",
+          "Filter: ((k = 20) OR ((k = 99) AND (label = 'keep'::text)))",
+          "(7 rows)",
+          "99 | keep",
+          "(2 rows)",
+          "QUERY PLAN",
+          "---------------------------------------------------------",
+          "Append",
+          "->  Seq Scan on list_default_or_b list_default_or_1",
+          "Filter: ((k = 20) OR (k = 99))",
+          "->  Seq Scan on list_default_or_def list_default_or_2",
+          "Filter: ((k = 20) OR (k = 99))",
+          "(5 rows)"
+        ]
+      }
+    }
+  ]
+}

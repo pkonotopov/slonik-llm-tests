@@ -1,0 +1,150 @@
+diff --git a/src/backend/executor/nodeModifyTable.c b/src/backend/executor/nodeModifyTable.c
+index 7c1d0e9..1a8e4bb 100644
+--- a/src/backend/executor/nodeModifyTable.c
++++ b/src/backend/executor/nodeModifyTable.c
+@@ -2515,6 +2515,27 @@ ExecUpdate(ModifyTableContext *context, ResultRelInfo *resultRelInfo,
+ 	{
+ 		ItemPointerData lockedtid;
+ 
++		/*
++		 * If ExecUpdatePrologue's BEFORE ROW UPDATE trigger processing found
++		 * a concurrently updated tuple and rechecked the plan against its
++		 * latest version via EvalPlanQual (see ExecBRUpdateTriggers), tupleid
++		 * now refers to that latest version, but oldSlot still holds the
++		 * outdated version originally found by the subplan.  Re-fetch the
++		 * latest version into oldSlot, so that RETURNING OLD.* reports the
++		 * values of the tuple actually being updated.  When there are no
++		 * BEFORE ROW UPDATE triggers, this is instead handled by the
++		 * TM_Updated case below.
++		 */
++		if (resultRelInfo->ri_TrigDesc &&
++			resultRelInfo->ri_TrigDesc->trig_update_before_row &&
++			context->tmfd.traversed)
++		{
++			if (!table_tuple_fetch_row_version(resultRelationDesc, tupleid,
++											   SnapshotAny, oldSlot))
++				elog(ERROR, "failed to fetch tuple being updated");
++			context->tmfd.traversed = false;
++		}
++
+ 		/*
+ 		 * If we generate a new candidate tuple after EvalPlanQual testing, we
+ 		 * must loop back here to try again.  (We don't need to redo triggers,
+diff --git a/src/test/isolation/expected/update-returning-concurrent.out b/src/test/isolation/expected/update-returning-concurrent.out
+new file mode 100644
+index 0000000..dfabec5
+--- /dev/null
++++ b/src/test/isolation/expected/update-returning-concurrent.out
+@@ -0,0 +1,49 @@
++Parsed test spec with 3 sessions
++
++starting permutation: s1u s2u s1c s2u s2c s3sel
++step s1u: UPDATE ret SET n = n + 10 WHERE id = 1;
++step s2u: UPDATE ret SET n = n + 1 WHERE id = 1 RETURNING OLD.n, NEW.n; <waiting ...>
++step s1c: COMMIT;
++step s2u: <... completed>
++ n| n
++--+--
++17|18
++(1 row)
++
++step s2u: UPDATE ret SET n = n + 1 WHERE id = 1 RETURNING OLD.n, NEW.n;
++ n| n
++--+--
++18|19
++(1 row)
++
++step s2c: COMMIT;
++step s3sel: SELECT n FROM ret ORDER BY id;
++ n
++--
++19
++(1 row)
++
++
++starting permutation: s1u s2u s1r s2u s2c s3sel
++step s1u: UPDATE ret SET n = n + 10 WHERE id = 1;
++step s2u: UPDATE ret SET n = n + 1 WHERE id = 1 RETURNING OLD.n, NEW.n; <waiting ...>
++step s1r: ROLLBACK;
++step s2u: <... completed>
++n|n
++-+-
++7|8
++(1 row)
++
++step s2u: UPDATE ret SET n = n + 1 WHERE id = 1 RETURNING OLD.n, NEW.n;
++n|n
++-+-
++8|9
++(1 row)
++
++step s2c: COMMIT;
++step s3sel: SELECT n FROM ret ORDER BY id;
++n
++-
++9
++(1 row)
++
+diff --git a/src/test/isolation/isolation_schedule b/src/test/isolation/isolation_schedule
+index 204b9e3..8e284f2 100644
+--- a/src/test/isolation/isolation_schedule
++++ b/src/test/isolation/isolation_schedule
+@@ -38,6 +38,7 @@ test: fk-snapshot
+ test: subxid-overflow
+ test: eval-plan-qual
+ test: eval-plan-qual-trigger
++test: update-returning-concurrent
+ test: inplace-inval
+ test: intra-grant-inplace
+ test: intra-grant-inplace-db
+diff --git a/src/test/isolation/specs/update-returning-concurrent.spec b/src/test/isolation/specs/update-returning-concurrent.spec
+new file mode 100644
+index 0000000..19b715f
+--- /dev/null
++++ b/src/test/isolation/specs/update-returning-concurrent.spec
+@@ -0,0 +1,45 @@
++# Tests for UPDATE ... RETURNING OLD/NEW when the target tuple was
++# concurrently updated.  In READ COMMITTED, the tuple update can be
++# rechecked against the tuple's latest version by EvalPlanQual during
++# BEFORE ROW UPDATE trigger processing (see ExecBRUpdateTriggers).  In
++# that case RETURNING OLD.* must report the values of the tuple
++# actually updated, that is, the latest version, not the stale one
++# originally found by the query.
++
++setup
++{
++  CREATE TABLE ret (id int PRIMARY KEY, n int NOT NULL);
++  CREATE FUNCTION pass_new() RETURNS trigger LANGUAGE plpgsql
++  AS $$ BEGIN RETURN NEW; END; $$;
++  CREATE TRIGGER touch BEFORE UPDATE ON ret
++    FOR EACH ROW EXECUTE FUNCTION pass_new();
++  INSERT INTO ret VALUES (1, 7);
++}
++
++teardown
++{
++  DROP TABLE ret;
++  DROP FUNCTION pass_new();
++}
++
++session s1
++setup { BEGIN ISOLATION LEVEL READ COMMITTED; }
++step s1u { UPDATE ret SET n = n + 10 WHERE id = 1; }
++step s1c { COMMIT; }
++step s1r { ROLLBACK; }
++
++session s2
++setup { BEGIN ISOLATION LEVEL READ COMMITTED; }
++step s2u { UPDATE ret SET n = n + 1 WHERE id = 1 RETURNING OLD.n, NEW.n; }
++step s2c { COMMIT; }
++
++session s3
++step s3sel { SELECT n FROM ret ORDER BY id; }
++
++# s2 waits for s1, then updates the version s1 committed.  OLD must be
++# the version immediately before s2's update (17), not the one seen by
++# s2's query snapshot (7).
++permutation s1u s2u s1c s2u s2c s3sel
++
++# Same, but s1 rolls back, so s2 updates the tuple it originally saw.
++permutation s1u s2u s1r s2u s2c s3sel

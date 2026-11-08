@@ -1,0 +1,457 @@
+{
+  "scope": "The three completed clean repeated runs used in article v3; no earlier model-series results.",
+  "baseline_revision": "abecdbc6af0192eb8fc017af5c7a3bb3d5da1ae3",
+  "upstream_fix_revision": "4908225bebdc31c9b8f735ad1db3d08d9bc85148",
+  "prompt_sha256": "bac4e8c76d4bdc85467982274caf2d0a24b22b500d03bb45380af6306b5531ac",
+  "accounting": {
+    "source": "Completed oMLX responses for the task, reconciled with retained Langfuse observations and Markov ledgers where available.",
+    "input_includes_cached_and_repeated_context": true,
+    "startup_probe_included": false,
+    "separate_reasoning_tokens_available": false,
+    "markov_seconds_include_tool_commands": true,
+    "markov_seconds_exclude_cold_load_and_independent_validation": true
+  },
+  "models": {
+    "slonik": {
+      "model": "Slonik-27B-oQ8-mtp",
+      "markov_seconds": 655.83,
+      "responses": 64,
+      "commands": 61,
+      "input_tokens": 1729139,
+      "output_tokens": 23945,
+      "patch_sha256": "19074a2b612175a252c0342688631cfa377a4a20309c8b963097a5a94619776a",
+      "patch_bytes": 3875,
+      "validation": {
+        "independent_checkout": true,
+        "steps": {
+          "build": 0,
+          "scenarios": 0,
+          "replication": 0,
+          "upstream_isolation": 0,
+          "fdw": 0,
+          "regression": 0,
+          "isolation": 0
+        },
+        "scenarios": {
+          "commit_with_trigger": {
+            "actual": {
+              "sqlstate": "00000",
+              "returning": [
+                "17|18"
+              ],
+              "stored": [
+                "18"
+              ]
+            },
+            "expected": {
+              "sqlstate": "00000",
+              "returning": [
+                "17|18"
+              ],
+              "stored": [
+                "18"
+              ]
+            },
+            "pass": true
+          },
+          "rollback_with_trigger": {
+            "actual": {
+              "sqlstate": "00000",
+              "returning": [
+                "7|8"
+              ],
+              "stored": [
+                "8"
+              ]
+            },
+            "expected": {
+              "sqlstate": "00000",
+              "returning": [
+                "7|8"
+              ],
+              "stored": [
+                "8"
+              ]
+            },
+            "pass": true
+          },
+          "commit_without_trigger": {
+            "actual": {
+              "sqlstate": "00000",
+              "returning": [
+                "17|18"
+              ],
+              "stored": [
+                "18"
+              ]
+            },
+            "expected": {
+              "sqlstate": "00000",
+              "returning": [
+                "17|18"
+              ],
+              "stored": [
+                "18"
+              ]
+            },
+            "pass": true
+          },
+          "predicate_rechecked": {
+            "actual": {
+              "sqlstate": "00000",
+              "returning": [],
+              "stored": [
+                "17"
+              ]
+            },
+            "expected": {
+              "sqlstate": "00000",
+              "returning": [],
+              "stored": [
+                "17"
+              ]
+            },
+            "pass": true
+          },
+          "repeatable_read": {
+            "actual": {
+              "sqlstate": "40001",
+              "returning": [],
+              "stored": [
+                "17"
+              ]
+            },
+            "expected": {
+              "sqlstate": "40001",
+              "returning": [],
+              "stored": [
+                "17"
+              ]
+            },
+            "pass": true
+          }
+        },
+        "regression_tests": 231,
+        "isolation_tests": 121,
+        "seconds": 189.08
+      },
+      "test_without_fix": {
+        "detected": true,
+        "changed_specs": [
+          "returning-old-concurrent"
+        ],
+        "paired_specs": [
+          "returning-old-concurrent"
+        ],
+        "exit_code": 2,
+        "failing_tests": [
+          "returning-old-concurrent"
+        ],
+        "stale_value_observed": true
+      }
+    },
+    "qwen": {
+      "model": "Qwen3.8-27B-8bit",
+      "markov_seconds": 1485.67,
+      "responses": 106,
+      "commands": 102,
+      "input_tokens": 1660956,
+      "output_tokens": 30362,
+      "patch_sha256": "a8f0efb67e8435d2a0abec6e7c93584611b06b4b23fe8dc85174b51ad48676e9",
+      "patch_bytes": 3934,
+      "validation": {
+        "independent_checkout": true,
+        "steps": {
+          "build": 0,
+          "scenarios": 0,
+          "replication": 0,
+          "upstream_isolation": 0,
+          "fdw": 0,
+          "regression": 0,
+          "isolation": 0
+        },
+        "scenarios": {
+          "commit_with_trigger": {
+            "actual": {
+              "sqlstate": "00000",
+              "returning": [
+                "17|18"
+              ],
+              "stored": [
+                "18"
+              ]
+            },
+            "expected": {
+              "sqlstate": "00000",
+              "returning": [
+                "17|18"
+              ],
+              "stored": [
+                "18"
+              ]
+            },
+            "pass": true
+          },
+          "rollback_with_trigger": {
+            "actual": {
+              "sqlstate": "00000",
+              "returning": [
+                "7|8"
+              ],
+              "stored": [
+                "8"
+              ]
+            },
+            "expected": {
+              "sqlstate": "00000",
+              "returning": [
+                "7|8"
+              ],
+              "stored": [
+                "8"
+              ]
+            },
+            "pass": true
+          },
+          "commit_without_trigger": {
+            "actual": {
+              "sqlstate": "00000",
+              "returning": [
+                "17|18"
+              ],
+              "stored": [
+                "18"
+              ]
+            },
+            "expected": {
+              "sqlstate": "00000",
+              "returning": [
+                "17|18"
+              ],
+              "stored": [
+                "18"
+              ]
+            },
+            "pass": true
+          },
+          "predicate_rechecked": {
+            "actual": {
+              "sqlstate": "00000",
+              "returning": [],
+              "stored": [
+                "17"
+              ]
+            },
+            "expected": {
+              "sqlstate": "00000",
+              "returning": [],
+              "stored": [
+                "17"
+              ]
+            },
+            "pass": true
+          },
+          "repeatable_read": {
+            "actual": {
+              "sqlstate": "40001",
+              "returning": [],
+              "stored": [
+                "17"
+              ]
+            },
+            "expected": {
+              "sqlstate": "40001",
+              "returning": [],
+              "stored": [
+                "17"
+              ]
+            },
+            "pass": true
+          }
+        },
+        "regression_tests": 231,
+        "isolation_tests": 121,
+        "seconds": 185.15
+      },
+      "test_without_fix": {
+        "detected": true,
+        "changed_specs": [
+          "update-returning-old-trigger"
+        ],
+        "paired_specs": [
+          "update-returning-old-trigger"
+        ],
+        "exit_code": 2,
+        "failing_tests": [
+          "update-returning-old-trigger"
+        ],
+        "stale_value_observed": true
+      }
+    },
+    "glm": {
+      "model": "GLM-5.3-Flash-oQ4e-mtp",
+      "markov_seconds": 873.37,
+      "responses": 72,
+      "commands": 84,
+      "input_tokens": 2277694,
+      "output_tokens": 33457,
+      "patch_sha256": "bd1a741b3ad8109eebd363a8910024200da6dde74692fee3e6f101212b56abc7",
+      "patch_bytes": 4872,
+      "validation": {
+        "independent_checkout": true,
+        "steps": {
+          "build": 0,
+          "scenarios": 0,
+          "replication": 0,
+          "upstream_isolation": 0,
+          "fdw": 0,
+          "regression": 0,
+          "isolation": 0
+        },
+        "scenarios": {
+          "commit_with_trigger": {
+            "actual": {
+              "sqlstate": "00000",
+              "returning": [
+                "17|18"
+              ],
+              "stored": [
+                "18"
+              ]
+            },
+            "expected": {
+              "sqlstate": "00000",
+              "returning": [
+                "17|18"
+              ],
+              "stored": [
+                "18"
+              ]
+            },
+            "pass": true
+          },
+          "rollback_with_trigger": {
+            "actual": {
+              "sqlstate": "00000",
+              "returning": [
+                "7|8"
+              ],
+              "stored": [
+                "8"
+              ]
+            },
+            "expected": {
+              "sqlstate": "00000",
+              "returning": [
+                "7|8"
+              ],
+              "stored": [
+                "8"
+              ]
+            },
+            "pass": true
+          },
+          "commit_without_trigger": {
+            "actual": {
+              "sqlstate": "00000",
+              "returning": [
+                "17|18"
+              ],
+              "stored": [
+                "18"
+              ]
+            },
+            "expected": {
+              "sqlstate": "00000",
+              "returning": [
+                "17|18"
+              ],
+              "stored": [
+                "18"
+              ]
+            },
+            "pass": true
+          },
+          "predicate_rechecked": {
+            "actual": {
+              "sqlstate": "00000",
+              "returning": [],
+              "stored": [
+                "17"
+              ]
+            },
+            "expected": {
+              "sqlstate": "00000",
+              "returning": [],
+              "stored": [
+                "17"
+              ]
+            },
+            "pass": true
+          },
+          "repeatable_read": {
+            "actual": {
+              "sqlstate": "40001",
+              "returning": [],
+              "stored": [
+                "17"
+              ]
+            },
+            "expected": {
+              "sqlstate": "40001",
+              "returning": [],
+              "stored": [
+                "17"
+              ]
+            },
+            "pass": true
+          }
+        },
+        "regression_tests": 231,
+        "isolation_tests": 121,
+        "seconds": 193.41
+      },
+      "test_without_fix": {
+        "detected": true,
+        "changed_specs": [
+          "update-returning-concurrent"
+        ],
+        "paired_specs": [
+          "update-returning-concurrent"
+        ],
+        "exit_code": 2,
+        "failing_tests": [
+          "update-returning-concurrent"
+        ],
+        "stale_value_observed": true
+      }
+    }
+  },
+  "token_reconciliation": {
+    "qwen": {
+      "langfuse_output_tokens": 11312,
+      "omlx_output_tokens": 30362,
+      "missing_long_calls_output_tokens": [
+        5370,
+        5512,
+        7527
+      ],
+      "missing_long_calls_seconds": 718.74,
+      "missing_final_output_tokens": 641,
+      "interpretation": "Context drops after the three long calls suggest compaction; this is an inference from the saved trace."
+    },
+    "glm": {
+      "langfuse_output_tokens": 32839,
+      "missing_final_output_tokens": 618,
+      "corrected_output_tokens": 33457,
+      "corrected_totals_match_markov_usage_ledger": true
+    },
+    "slonik": {
+      "corrected_totals_match_markov_usage_ledger": true
+    }
+  },
+  "dates_moscow": [
+    "2026-11-07",
+    "2026-11-08"
+  ]
+}

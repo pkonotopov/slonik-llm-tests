@@ -1,0 +1,110 @@
+diff --git a/src/backend/executor/nodeModifyTable.c b/src/backend/executor/nodeModifyTable.c
+index 7c1d0e9..0c371fa 100644
+--- a/src/backend/executor/nodeModifyTable.c
++++ b/src/backend/executor/nodeModifyTable.c
+@@ -2480,6 +2480,29 @@ ExecUpdate(ModifyTableContext *context, ResultRelInfo *resultRelInfo,
+ 	if (!ExecUpdatePrologue(context, resultRelInfo, tupleid, oldtuple, slot, NULL))
+ 		return NULL;
+ 
++
++
++	/*
++	 * If a BEFORE ROW UPDATE trigger is present, the prologue has already
++	 * locked the target tuple (via GetTupleForTrigger) and, if it was
++	 * concurrently updated, re-locked the latest version.  In that case
++	 * ExecUpdateAct below will not report TM_Updated, so the refresh of
++	 * ri_oldTupleSlot normally done in that case would never happen.  Do it
++	 * here instead, so that RETURNING OLD references the latest row version
++	 * rather than the one fetched when the tuple was scanned.
++	 */
++	if (context->tmfd.traversed && ItemPointerIsValid(tupleid) &&
++		resultRelInfo->ri_oldTupleSlot != NULL)
++	{
++		if (unlikely(!resultRelInfo->ri_projectNewInfoValid))
++			ExecInitUpdateProjection(context->mtstate, resultRelInfo);
++
++		oldSlot = resultRelInfo->ri_oldTupleSlot;
++		if (!table_tuple_fetch_row_version(resultRelationDesc, tupleid,
++										   SnapshotAny, oldSlot))
++			elog(ERROR, "failed to fetch tuple being updated");
++	}
++
+ 	/* INSTEAD OF ROW UPDATE Triggers */
+ 	if (resultRelInfo->ri_TrigDesc &&
+ 		resultRelInfo->ri_TrigDesc->trig_update_instead_row)
+diff --git a/src/test/isolation/expected/update-returning-old-trigger.out b/src/test/isolation/expected/update-returning-old-trigger.out
+new file mode 100644
+index 0000000..08d2502
+--- /dev/null
++++ b/src/test/isolation/expected/update-returning-old-trigger.out
+@@ -0,0 +1,15 @@
++Parsed test spec with 2 sessions
++
++starting permutation: s1b s1u s2b s2r s1c s2c
++step s1b: BEGIN;
++step s1u: UPDATE urt_table SET n = n + 10 WHERE id = 1;
++step s2b: BEGIN ISOLATION LEVEL READ COMMITTED;
++step s2r: UPDATE urt_table SET n = n + 1 WHERE id = 1 RETURNING OLD.n, NEW.n; <waiting ...>
++step s1c: COMMIT;
++step s2r: <... completed>
++ n| n
++--+--
++17|18
++(1 row)
++
++step s2c: COMMIT;
+diff --git a/src/test/isolation/isolation_schedule b/src/test/isolation/isolation_schedule
+index 204b9e3..e435e43 100644
+--- a/src/test/isolation/isolation_schedule
++++ b/src/test/isolation/isolation_schedule
+@@ -20,6 +20,7 @@ test: index-only-scan
+ test: index-only-bitmapscan
+ test: predicate-lock-hot-tuple
+ test: update-conflict-out
++test: update-returning-old-trigger
+ test: deadlock-simple
+ test: deadlock-hard
+ test: deadlock-soft
+diff --git a/src/test/isolation/specs/update-returning-old-trigger.spec b/src/test/isolation/specs/update-returning-old-trigger.spec
+new file mode 100644
+index 0000000..cedda73
+--- /dev/null
++++ b/src/test/isolation/specs/update-returning-old-trigger.spec
+@@ -0,0 +1,37 @@
++# Test that UPDATE ... RETURNING OLD reports the latest committed row
++# version after waiting for a concurrent writer, when a BEFORE UPDATE
++# row trigger is present.  Without the fix, OLD.n reports the value
++# fetched at scan time (7) instead of the value locked after A commits (17).
++
++setup
++{
++    CREATE TABLE urt_table(id int PRIMARY KEY, n int);
++    INSERT INTO urt_table VALUES (1, 7);
++
++    CREATE FUNCTION urt_pass_new() RETURNS trigger LANGUAGE plpgsql AS $body$
++    BEGIN
++        RETURN NEW;
++    END;
++    $body$;
++
++    CREATE TRIGGER urt_bu BEFORE UPDATE ON urt_table
++        FOR EACH ROW EXECUTE PROCEDURE urt_pass_new();
++}
++
++teardown
++{
++    DROP TABLE urt_table;
++    DROP FUNCTION urt_pass_new();
++}
++
++session s1
++step s1b { BEGIN; }
++step s1u { UPDATE urt_table SET n = n + 10 WHERE id = 1; }
++step s1c { COMMIT; }
++
++session s2
++step s2b { BEGIN ISOLATION LEVEL READ COMMITTED; }
++step s2r { UPDATE urt_table SET n = n + 1 WHERE id = 1 RETURNING OLD.n, NEW.n; }
++step s2c { COMMIT; }
++
++permutation s1b s1u s2b s2r s1c s2c

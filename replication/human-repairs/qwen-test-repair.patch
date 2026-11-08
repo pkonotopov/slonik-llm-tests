@@ -1,0 +1,67 @@
+diff --git a/src/test/subscription/t/036_stream_subxact_abort_reclaim.pl b/src/test/subscription/t/036_stream_subxact_abort_reclaim.pl
+--- a/src/test/subscription/t/036_stream_subxact_abort_reclaim.pl
++++ b/src/test/subscription/t/036_stream_subxact_abort_reclaim.pl
+@@ -15,7 +15,7 @@
+ use Test::More;
+ 
+ my $SERIALIZE_LOG = qr/LOG: ( [A-Z0-9]+:)? logical replication apply worker will serialize the remaining changes of remote transaction \d+ to a file/;
+-my $RECLAIM_LOG = qr/DEBUG: reclaimed \d+ bytes from partial stream for transaction \d+/;
++my $RECLAIM_LOG = qr/DEBUG:\s+reclaimed \d+ bytes from partial stream for transaction \d+/;
+ 
+ my $node_publisher = PostgreSQL::Test::Cluster->new('publisher');
+ $node_publisher->init(allows_streaming => 'logical');
+@@ -32,16 +32,19 @@
+ my $appname = 'tap_sub';
+ 
+ $node_publisher->safe_psql('postgres',
+-	"CREATE TABLE ledger (a int primary key, b int); "
++	"CREATE TABLE ledger (a int primary key, b int, payload text); "
+ 	  . 'CREATE TABLE gate (a int primary key)');
+ $node_publisher->safe_psql('postgres',
+ 	'CREATE PUBLICATION tap_pub FOR TABLE ledger, gate');
++
++$node_subscriber->safe_psql('postgres',
++	'CREATE TABLE gate (a int primary key); CREATE TABLE ledger (a int primary key, b int, payload text)');
+ 
+ $node_subscriber->safe_psql(
+ 	'postgres',
+ 	"CREATE SUBSCRIPTION $appname CONNECTION '"
+ 	  . $node_publisher->connstr
+-	  . " dbname=postgres application_name=$appname' PUBLICATION tap_pub WITH (streaming = parallel)"
++	  . " dbname=postgres application_name=$appname' PUBLICATION tap_pub WITH (streaming = parallel, copy_data = false)"
+ 	);
+ 
+ # Wait for initial table sync to finish.
+@@ -55,7 +58,7 @@
+ {
+ 	my ($offset) = @_;
+ 	my $log = PostgreSQL::Test::Utils::slurp_file($node_subscriber->logfile);
+-	isnt(substr($log, $offset), qr/\b(ERROR|FATAL|PANIC):/,
++	unlike(substr($log, $offset), qr/\b(ERROR|FATAL|PANIC):/,
+ 		'no errors in the subscriber log');
+ }
+ 
+@@ -87,7 +90,7 @@
+ 
+ # The parallel apply worker has applied the subtransaction's change, so it
+ # has defined a savepoint for it.
+-$node_subscriber->wait_for_log(qr/DEBUG: defining savepoint/, $offset);
++$node_subscriber->wait_for_log(qr/DEBUG:\s+defining savepoint/, $offset);
+ 
+ # Block the parallel apply worker on the gate table.
+ $writer->query(q{INSERT INTO gate VALUES (1);});
+@@ -96,12 +99,12 @@
+ 	'postgres', q{
+ 		SELECT 1 FROM pg_stat_subscription
+ 		WHERE leader_pid IS NOT NULL
+-		  AND cardinality(pg_blocking_pids(pid)) > 0})
++		  AND cardinality(pg_blocking_pids(pid)) > 0}, '1')
+   or die 'Timed out waiting for the parallel apply worker to be blocked';
+ 
+ # The next change cannot be sent to the (blocked) parallel apply worker, so
+ # the leader serializes it to a file.
+-$writer->query(q{INSERT INTO ledger VALUES (3, 30);});
++$writer->query(q{INSERT INTO ledger VALUES (3, 30, repeat('x', 20 * 1024 * 1024));});
+ flush();
+ $node_subscriber->wait_for_log($SERIALIZE_LOG, $offset);
+ 
